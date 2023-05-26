@@ -1,20 +1,77 @@
 {
-    "id": "{{taskid}}",
-    "name": "MyCustomTask{{tag}}",
-    "friendlyName": "My custom task",
-    "description": "My custom task",
-    "categories": [
-        "Azure Pipelines"
-    ],
-    "author": "{{author}}",
-    "version": {
-        "Major": "{{major}}",
-        "Minor": "{{minor}}",
-        "Patch": "{{patch}}"
+  "id": "{{taskid}}",
+  "name": "deployment-build-task{{tag}}",
+  "friendlyName": "Send Deployment Information",
+  "description": "Send deployment information to Apwide Golive for Jira",
+  "author": "apwide",
+  "helpMarkDown": "Replace with Markdown to show in help",
+  "category": "Build",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [],
+  "version": {
+    "Major": "{{major}}",
+    "Minor": "{{minor}}",
+    "Patch": "{{patch}}"
+  },
+  "minimumAgentVersion": "1.95.0",
+  "instanceNameFormat": "Service Endpoint Build Task $(project)",
+  "inputs": [
+    {
+      "name": "serviceConnection",
+      "type": "connectedService:golive",
+      "label": "Service Connection",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Select the Apwide Golive for Jira end point to use. If needed,selection 'manage', and add a new service endpoint of type 'Apwide Golive server connection'"
     },
-    "execution": {
-        "Node": {
-            "target": "main.js"
-        }
+    {
+      "name": "applicationId",
+      "type": "pickList",
+      "label": "Application",
+      "required": true,
+      "helpMarkDown": "Select the name of the Apwide Golive for Jira application.",
+      "properties": {
+        "EditableOptions": "True"
+      }
+    },
+    {
+      "name": "environmentId",
+      "type": "pickList",
+      "label": "Environment",
+      "required": true,
+      "helpMarkDown": "Select the name of the Apwide Golive for Jira environment.",
+      "properties": {
+        "EditableOptions": "True"
+      }
     }
+  ],
+  "dataSourceBindings": [
+    {
+      "target": "applicationId",
+      "endpointId": "$(serviceConnection)",
+      "dataSourceName": "applications",
+      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{name}}}\"}"
+    },
+    {
+      "target": "environmentId",
+      "endpointId": "$(serviceConnection)",
+      "dataSourceName": "environments",
+      "parameters": {
+        "applicationId": "$(applicationId)"
+      },
+      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{name}}}\"}"
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "main.js",
+      "argumentFormat": ""
+    },
+    "PowerShell3": {
+      "target": "sample.ps1"
+    }
+  }
 }

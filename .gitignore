@@ -1,4 +1,79 @@
-node_modules
+# macOS
+.DS_store
+
+# intellij
+.idea/
+*.iml
+
+# mvn
+target/
+
+# debug jvm
+.attach*
+
+# npm
+# node_modules/
+
+# logs
+chromedriver.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# atlassian connect express
+apwide-ui/credentials.json
+
+# boot local dev
+application-local*.yaml
+
+# eclipse files
+bin/
+.springBeans
+.classpath
+.settings/
+.project
+
+# with / to ignore only the one at root
+# in some modules, yarn.lock is committed...?
+/yarn.lock
+
+# jenkins
+*@tmp/
+
+# downloaded from external mvn dependency and jenkins should ignore any created runtime files
+build/jira/jira-home
+
+.yarnrc
+.npmrc
+
+node
+/dist/
+dist-cloud/
+dist-timeline/
+dist-timeline-insight/
+dist-cloud-timeline/
+dist-light/
+
+/tests/e2e/videos/
+/tests/e2e/screenshots/
+
+# local env files
+.env.local
+.env.*.local
+
+# Editor directories and files
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*
+
+.editorconfig
+
+/node_modules
+
+*.vsix
 dist
 /**/.vsix
 /.vs
@@ -11,3 +86,4 @@ coverage
 test-report.xml
 test-report.html
 test-report.json
+.env*

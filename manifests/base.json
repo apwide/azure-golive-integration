@@ -1,16 +1,16 @@
 {
     "manifestVersion": 1,
-    "id": "MyCustomExtension{{tag}}",
-    "name": "My Custom Extension {{tag}}",
+    "id": "ApwideGoliveForJira{{tag}}",
+    "name": "Apwide Golive for Jira {{tag}}",
     "icons": {
-        "default": "icon.png"
+        "default": "golive.png"
     },
     "version": "{{version}}",
     "description": "This extension contains a custom build and release task.",
-    "publisher": "{{publisher}}",
+    "publisher": "apwide",
     "public": false,
     "categories": [
-        "Azure Pipelines"
+        "Azure Pipelines", "Azure Repos"
     ],
     "content": {
         "details": {
@@ -24,11 +24,45 @@
     ],
     "contributions": [
         {
-            "id": "custom-task",
+            "id": "service-endpoint",
+            "description": "Service endpoint type for Apwide Golive connections",
+            "type": "ms.vss-endpoint.service-endpoint-type",
+            "targets": [ "ms.vss-endpoint.endpoint-types" ],
+            "properties": {
+                "name": "golive",
+                "displayName": "Apwide Golive for Jira Cloud",
+                "url": "https://golive.apwide.net/api/",
+                "dataSources": [
+                    {
+                        "name": "applications",
+                        "endpointUrl": "{{endpoint.url}}applications",
+                        "resultSelector": "jsonpath:$[*]"
+                    },
+                    {
+                        "name": "environments",
+                        "endpointUrl": "{{endpoint.url}}environments/search/paginated?applicationId=$(applicationId)&_limit=0",
+                        "resultSelector": "jsonpath:$.environments[*]"
+                    }
+                ],
+                "authenticationSchemes": [
+                    {
+                        "type": "ms.vss-endpoint.endpoint-auth-scheme-token",
+                        "headers": [
+                            {
+                                "name": "Authorization",
+                                "value": "Bearer {{ endpoint.apitoken }}"
+                            }
+                        ]
+                    }
+                ],
+                "helpMarkDown": "<a href=\"url-to-documentation\" target=\"_blank\"><b>Learn More</b></a>"
+            }
+        },
+        {
+            "id": "deployment-build-task",
+            "description": "Task to push deployment information to Apwide Golive",
             "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
+            "targets": [ "ms.vss-distributed-task.tasks" ],
             "properties": {
                 "name": "custom-task"
             }
