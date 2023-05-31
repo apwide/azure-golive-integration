@@ -1,3 +1,6 @@
+pool:
+  vmImage: "ubuntu-latest"
+
 steps:
 - powershell: |
    Write-Host '##vso[task.setvariable variable=BUILD_ENV]production'
