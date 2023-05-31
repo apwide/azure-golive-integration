@@ -59,7 +59,7 @@
             }
         },
         {
-            "id": "deployment-build-task",
+            "id": "send-deployment-infos",
             "description": "Task to push deployment information to Apwide Golive",
             "type": "ms.vss-distributed-task.task",
             "targets": [ "ms.vss-distributed-task.tasks" ],

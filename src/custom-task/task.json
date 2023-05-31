@@ -1,7 +1,7 @@
 {
   "id": "{{taskid}}",
-  "name": "deployment-build-task{{tag}}",
-  "friendlyName": "({{tag}}) Send Deployment Information",
+  "name": "send-deployment-infos{{tag}}",
+  "friendlyName": "(Golive{{tag}}) Send deployment information",
   "description": "Send deployment information to Apwide Golive for Jira",
   "author": "apwide",
   "helpMarkDown": "Replace with Markdown to show in help",
@@ -31,11 +31,12 @@
       "name": "applicationId",
       "type": "pickList",
       "label": "Application",
-      "required": true,
+      "required": false,
       "helpMarkDown": "Select the name of the Apwide Golive for Jira application.",
       "properties": {
         "EditableOptions": "True"
-      }
+      },
+      "visibleRule": "serviceConnection > 0"
     },
     {
       "name": "environmentId",
@@ -45,7 +46,47 @@
       "helpMarkDown": "Select the name of the Apwide Golive for Jira environment.",
       "properties": {
         "EditableOptions": "True"
-      }
+      },
+      "visibleRule": "applicationId > 0"
+    },
+    {
+      "name": "versionName",
+      "type": "string",
+      "label": "Version Name",
+      "required": true,
+      "helpMarkDown": "Name of the deployed version.",
+      "visibleRule": "environmentId > 0"
+    },
+    {
+      "name": "buildNumber",
+      "type": "string",
+      "label": "Build Number",
+      "required": false,
+      "defaultValue": "$(Build.BuildNumber)",
+      "helpMarkDown": "Build number.",
+      "visibleRule": "environmentId > 0"
+    },
+    {
+      "name": "description",
+      "type": "multiline",
+      "label": "Description",
+      "required": false,
+      "defaultValue": "<b>✅ Job #$(Build.BuildId) - $(Build.DefinitionName)</b>\nRequested by: $(Build.RequestedFor) \nBranch: $(Build.SourceBranchName)",
+      "helpMarkDown": "Description of the deployment.",
+      "properties": {
+        "resizable": "true",
+        "rows": "10",
+        "maxLength": "2000"
+      },
+      "visibleRule": "environmentId > 0"
+    },
+    {
+      "name": "issueKeys",
+      "type": "string",
+      "label": "Jira Issue Keys",
+      "required": false,
+      "helpMarkDown": "Comma separated list of Jira Issue Keys that are deployed. Ex: ECOM-3412,ECOM-6783,PAY-98",
+      "visibleRule": "environmentId > 0"
     }
   ],
   "dataSourceBindings": [
