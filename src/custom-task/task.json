@@ -1,7 +1,7 @@
 {
   "id": "{{taskid}}",
   "name": "deployment-build-task{{tag}}",
-  "friendlyName": "Send Deployment Information",
+  "friendlyName": "({{tag}}) Send Deployment Information",
   "description": "Send deployment information to Apwide Golive for Jira",
   "author": "apwide",
   "helpMarkDown": "Replace with Markdown to show in help",
