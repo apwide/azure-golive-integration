@@ -44,7 +44,7 @@ steps:
     targetType: 'inline'
     script: grep -rl '{{version}}' dist | xargs --verbose sed -i 's/{{version}}/$(Build.BuildNumber)/g'
 
-- task: ms-devlabs.vsts-developer-tools-build-tasks.package-extension-build-task.PackageVSTSExtension@1
+- task: PackageAzureDevOpsExtension@4
   displayName: 'Package extension'
   inputs:
     rootFolder: dist
