@@ -1,6 +1,9 @@
+pool:
+  vmImage: "ubuntu-latest"
+
 steps:
 - powershell: |
-   Write-Host '##vso[task.setvariable variable=BUILD_ENV]production'
+   Write-Host '##vso[task.setvariable variable=BUILD_ENV]development'
   displayName: "Set build environment"
 
 - task: Npm@1
@@ -44,7 +47,7 @@ steps:
     targetType: 'inline'
     script: grep -rl '{{version}}' dist | xargs --verbose sed -i 's/{{version}}/$(Build.BuildNumber)/g'
 
-- task: ms-devlabs.vsts-developer-tools-build-tasks.package-extension-build-task.PackageVSTSExtension@1
+- task: PackageAzureDevOpsExtension@4
   displayName: 'Package extension'
   inputs:
     rootFolder: dist
