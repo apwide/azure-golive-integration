@@ -1,10 +1,10 @@
 {
   "id": "{{taskid}}",
-  "name": "send-deployment-infos{{tag}}",
-  "friendlyName": "(Golive{{tag}}) Send deployment information",
+  "name": "ApwideGoliveTrackDeployment{{tag}}",
+  "friendlyName": "[Golive] Track deployment({{tag}})",
   "description": "Send deployment information to Apwide Golive for Jira",
   "author": "apwide",
-  "helpMarkDown": "Replace with Markdown to show in help",
+  "helpMarkDown": "Learn more about Apwide Golive and Environment Tracking [here](https://www.apwide.com/documentation/cloud/track-environments)",
   "category": "Build",
   "visibility": [
     "Build",
@@ -25,14 +25,14 @@
       "label": "Service Connection",
       "defaultValue": "",
       "required": true,
-      "helpMarkDown": "Select the Apwide Golive for Jira end point to use. If needed,selection 'manage', and add a new service endpoint of type 'Apwide Golive server connection'"
+      "helpMarkDown": "Apwide Golive for Jira connection to use. If needed, select 'Project settings', and create a new 'Service Connection' of type 'Apwide Golive for Jira'."
     },
     {
       "name": "applicationId",
       "type": "pickList",
       "label": "Application",
       "required": false,
-      "helpMarkDown": "Select the name of the Apwide Golive for Jira application.",
+      "helpMarkDown": "Application of the target environment",
       "properties": {
         "EditableOptions": "True"
       },
@@ -43,7 +43,7 @@
       "type": "pickList",
       "label": "Environment",
       "required": true,
-      "helpMarkDown": "Select the name of the Apwide Golive for Jira environment.",
+      "helpMarkDown": "Target environment the version is deployed to",
       "properties": {
         "EditableOptions": "True"
       },
@@ -54,7 +54,7 @@
       "type": "string",
       "label": "Version Name",
       "required": true,
-      "helpMarkDown": "Name of the deployed version.",
+      "helpMarkDown": "Deployed version",
       "visibleRule": "environmentId > 0"
     },
     {
@@ -63,7 +63,7 @@
       "label": "Build Number",
       "required": false,
       "defaultValue": "$(Build.BuildNumber)",
-      "helpMarkDown": "Build number.",
+      "helpMarkDown": "Build number",
       "visibleRule": "environmentId > 0"
     },
     {
@@ -72,7 +72,7 @@
       "label": "Description",
       "required": false,
       "defaultValue": "<b>✅ Job #$(Build.BuildId) - $(Build.DefinitionName)</b>\nRequested by: $(Build.RequestedFor) \nBranch: $(Build.SourceBranchName)",
-      "helpMarkDown": "Description of the deployment.",
+      "helpMarkDown": "Description of the deployment",
       "properties": {
         "resizable": "true",
         "rows": "10",
