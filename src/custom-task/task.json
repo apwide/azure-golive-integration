@@ -1,7 +1,7 @@
 {
   "id": "{{taskid}}",
   "name": "ApwideGoliveTrackDeployment{{tag}}",
-  "friendlyName": "[Golive] Track deployment({{tag}})",
+  "friendlyName": "[Golive] Track deployment{{tag}}",
   "description": "Send deployment information to Apwide Golive for Jira",
   "author": "apwide",
   "helpMarkDown": "Learn more about Apwide Golive and Environment Tracking [here](https://www.apwide.com/documentation/cloud/track-environments)",
