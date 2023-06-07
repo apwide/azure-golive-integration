@@ -24,13 +24,13 @@
     ],
     "contributions": [
         {
-            "id": "service-endpoint",
+            "id": "service-endpoint{{tag}}",
             "description": "Service endpoint type for Apwide Golive connections",
             "type": "ms.vss-endpoint.service-endpoint-type",
             "targets": [ "ms.vss-endpoint.endpoint-types" ],
             "properties": {
                 "name": "golive",
-                "displayName": "Apwide Golive for Jira Cloud",
+                "displayName": "Apwide Golive for Jira Cloud{{tag}}",
                 "url": "https://golive.apwide.net/api/",
                 "dataSources": [
                     {
