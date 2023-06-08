@@ -3,7 +3,7 @@ import request = require("request-promise-native");
 
 async function run() {
   try {
-    const environmentId: string = tl.getInput("environmentId", true);
+    const environmentId: string = tl.getInput("targetEnvironmentId", true);
     const goliveConnection: string = tl.getInput("serviceConnection", true);
     const goliveBaseUrl = tl.getEndpointUrl(goliveConnection, false);
     const apiToken = tl.getEndpointAuthorizationParameter(goliveConnection, "apitoken", false);
@@ -12,10 +12,10 @@ async function run() {
     tl.debug("goliveBaseUrl: " + goliveBaseUrl);
     tl.debug("apitoken: " + apiToken);
 
-    const versionName: string = tl.getInput("versionName", true);
-    const buildNumber: string | undefined = tl.getInput("buildNumber", false);
-    const description: string | undefined = tl.getInput("description", false);
-    const issueKeys: string | undefined = tl.getInput("issueKeys", false);
+    const versionName: string = tl.getInput("deploymentVersionName", true);
+    const buildNumber: string | undefined = tl.getInput("deploymentBuildNumber", false);
+    const description: string | undefined = tl.getInput("deploymentDescription", false);
+    const issueKeys: string | undefined = tl.getInput("deploymentIssueKeys", false);
 
     request.put({
         url: goliveBaseUrl + "deployment?environmentId=" + environmentId,

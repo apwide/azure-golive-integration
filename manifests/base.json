@@ -40,8 +40,18 @@
                     },
                     {
                         "name": "environments",
-                        "endpointUrl": "{{endpoint.url}}environments/search/paginated?applicationId=$(applicationId)&_limit=0",
+                        "endpointUrl": "{{endpoint.url}}environments/search/paginated?_expand=false&_limit=0",
                         "resultSelector": "jsonpath:$.environments[*]"
+                    },
+                    {
+                        "name": "categories",
+                        "endpointUrl": "{{endpoint.url}}categories",
+                        "resultSelector": "jsonpath:$[*]"
+                    },
+                    {
+                        "name": "statuses",
+                        "endpointUrl": "{{endpoint.url}}statuses",
+                        "resultSelector": "jsonpath:$[*]"
                     }
                 ],
                 "authenticationSchemes": [
@@ -59,7 +69,7 @@
             }
         },
         {
-            "id": "ApwideGoliveTrackDeployment",
+            "id": "ApwideGoliveTrackEnvironment",
             "description": "Task to push deployment information to Apwide Golive",
             "type": "ms.vss-distributed-task.task",
             "targets": [ "ms.vss-distributed-task.tasks" ],

@@ -1,8 +1,8 @@
 {
   "id": "{{taskid}}",
-  "name": "ApwideGoliveTrackDeployment{{tag}}",
-  "friendlyName": "[Golive] Track deployment{{tag}}",
-  "description": "Send deployment information to Apwide Golive for Jira",
+  "name": "ApwideGoliveSendEnvironmentInfos{{tag}}",
+  "friendlyName": "Apwide Golive Environment{{tag}}",
+  "description": "Send environment information to Apwide Golive for Jira",
   "author": "apwide",
   "helpMarkDown": "Learn more about Apwide Golive and Environment Tracking [here](https://www.apwide.com/documentation/cloud/track-environments)",
   "category": "Build",
@@ -18,6 +18,28 @@
   },
   "minimumAgentVersion": "1.95.0",
   "instanceNameFormat": "Service Endpoint Build Task $(project)",
+  "groups": [
+    {
+      "name": "target",
+      "displayName": "Target Environment",
+      "isExpanded": true
+    },
+    {
+      "name": "deployment",
+      "displayName": "Update Deployment",
+      "isExpanded": false
+    },
+    {
+      "name": "status",
+      "displayName": "Update Status",
+      "isExpanded": false
+    },
+    {
+      "name": "environment",
+      "displayName": "Update Environment",
+      "isExpanded": false
+    }
+  ],
   "inputs": [
     {
       "name": "serviceConnection",
@@ -28,46 +50,98 @@
       "helpMarkDown": "Apwide Golive for Jira connection to use. If needed, select 'Project settings', and create a new 'Service Connection' of type 'Apwide Golive for Jira'."
     },
     {
-      "name": "applicationId",
-      "type": "pickList",
-      "label": "Application",
+      "name": "targetEnvironmentName",
+      "type": "string",
+      "label": "Environment Name",
       "required": false,
-      "helpMarkDown": "Application of the target environment",
-      "properties": {
-        "EditableOptions": "True"
-      },
-      "visibleRule": "serviceConnection > 0"
+      "helpMarkDown": "Name of the environment in Apwide Golive",
+      "groupName": "target"
     },
     {
-      "name": "environmentId",
+      "name": "targetEnvironmentId",
       "type": "pickList",
-      "label": "Environment",
-      "required": true,
+      "label": "Environment ID",
+      "required": false,
       "helpMarkDown": "Target environment the version is deployed to",
       "properties": {
         "EditableOptions": "True"
       },
-      "visibleRule": "applicationId > 0"
+      "visibleRule": "targetEnvironmentName == ''",
+      "groupName": "target"
     },
     {
-      "name": "versionName",
+      "name": "targetAutoCreate",
+      "type": "boolean",
+      "label": "auto create (if not found)",
+      "required": false,
+      "helpMarkDown": "Try to create the target environment with provided information if it does not exist yet in Apwide Golive.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetEnvironmentName != ''",
+      "groupName": "target"
+    },
+    {
+      "name": "targetApplicationName",
+      "type": "string",
+      "label": "Application Name",
+      "required": false,
+      "helpMarkDown": "Type the name of the application to select or create the target environment. \nA new Application will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage applications in order to automatically create new applications.",
+      "visibleRule": "targetAutoCreate == true",
+      "groupName": "target"
+    },
+    {
+      "name": "targetApplicationId",
+      "type": "pickList",
+      "label": "Application ID",
+      "required": false,
+      "helpMarkDown": "Select an existing application to use to find/create the target environment.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetAutoCreate == true && targetApplicationName == ''",
+      "groupName": "target"
+    },
+    {
+      "name": "targetCategoryName",
+      "type": "string",
+      "label": "Category Name",
+      "required": false,
+      "helpMarkDown": "Type the name of the category to find/create the target environment. \nA new Category will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage categories in order to automatically create new categories.",
+      "visibleRule": "targetAutoCreate == true",
+      "groupName": "target"
+    },
+    {
+      "name": "targetCategoryId",
+      "type": "pickList",
+      "label": "Category ID",
+      "required": false,
+      "helpMarkDown": "Select an existing category to use to find/create the target environment.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetAutoCreate == true && targetCategoryName == ''",
+      "groupName": "target"
+    },
+    {
+      "name": "deploymentVersionName",
       "type": "string",
       "label": "Version Name",
-      "required": true,
+      "required": false,
       "helpMarkDown": "Deployed version",
-      "visibleRule": "environmentId > 0"
+      "groupName": "deployment"
     },
     {
-      "name": "buildNumber",
+      "name": "deploymentBuildNumber",
       "type": "string",
       "label": "Build Number",
       "required": false,
       "defaultValue": "$(Build.BuildNumber)",
       "helpMarkDown": "Build number",
-      "visibleRule": "environmentId > 0"
+      "groupName": "deployment"
     },
     {
-      "name": "description",
+      "name": "deploymentDescription",
       "type": "multiline",
       "label": "Description",
       "required": false,
@@ -78,32 +152,82 @@
         "rows": "10",
         "maxLength": "2000"
       },
-      "visibleRule": "environmentId > 0"
+      "groupName": "deployment"
     },
     {
-      "name": "issueKeys",
+      "name": "deploymentIssueKeys",
       "type": "string",
       "label": "Jira Issue Keys",
       "required": false,
       "helpMarkDown": "Comma separated list of Jira Issue Keys that are deployed. Ex: ECOM-3412,ECOM-6783,PAY-98",
-      "visibleRule": "environmentId > 0"
+      "groupName": "deployment"
+    },
+    {
+      "name": "environmentStatusName",
+      "type": "string",
+      "label": "Status Name",
+      "required": false,
+      "helpMarkDown": "Type the name of the new status of the environment",
+      "groupName": "status"
+    },
+    {
+      "name": "environmentStatusId",
+      "type": "pickList",
+      "label": "Status ID",
+      "required": false,
+      "helpMarkDown": "Select the new status of the environment",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "environmentStatusName == ''",
+      "groupName": "status"
+    },
+    {
+      "name": "environmentUrl",
+      "type": "string",
+      "label": "Url",
+      "required": false,
+      "helpMarkDown": "Update the url of the environment",
+      "groupName": "environment"
+    },
+    {
+      "name": "environmentAttributes",
+      "type": "multiline",
+      "label": "Attributes",
+      "required": false,
+      "helpMarkDown": "Environment attribute values in key-value format. Ex: TODO",
+      "properties": {
+        "resizable": "true",
+        "rows": "10",
+        "maxLength": "2000"
+      },
+      "groupName": "environment"
     }
   ],
   "dataSourceBindings": [
     {
-      "target": "applicationId",
+      "target": "targetApplicationId",
       "endpointId": "$(serviceConnection)",
       "dataSourceName": "applications",
-      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{name}}}\"}"
+      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{id}}} - {{{name}}}\"}"
     },
     {
-      "target": "environmentId",
+      "target": "targetEnvironmentId",
       "endpointId": "$(serviceConnection)",
       "dataSourceName": "environments",
-      "parameters": {
-        "applicationId": "$(applicationId)"
-      },
-      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{name}}}\"}"
+      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{id}}} - {{{name}}}\"}"
+    },
+    {
+      "target": "targetCategoryId",
+      "endpointId": "$(serviceConnection)",
+      "dataSourceName": "categories",
+      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{id}}} - {{{name}}}\"}"
+    },
+    {
+      "target": "environmentStatusId",
+      "endpointId": "$(serviceConnection)",
+      "dataSourceName": "statuses",
+      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{id}}} - {{{name}}}\"}"
     }
   ],
   "execution": {
