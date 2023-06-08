@@ -202,6 +202,9 @@ async function run() {
         if (description){
           requestBody.description = description;
         }
+        if (issueKeys){
+          requestBody.issueKeys = issueKeys.replace(/\s/g, "").split(",")
+        }
         if (deploymentAttributes){
           requestBody.attributes = parseAttributes(deploymentAttributes);
         }
