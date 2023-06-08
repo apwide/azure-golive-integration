@@ -163,6 +163,19 @@
       "groupName": "deployment"
     },
     {
+      "name": "deploymentAttributes",
+      "type": "multiline",
+      "label": "Deployment Attributes",
+      "required": false,
+      "helpMarkDown": "Deployment attribute values in key-value JSON format. Ex:\n{\n  \"Requested By\" : \"me@company.com\",\n  \"Artefacts\" : \"https://binaries.company.com/download/232323\",\n  \"Repository\" : \"https://github.com/\"\n}",
+      "properties": {
+        "resizable": "true",
+        "rows": "10",
+        "maxLength": "2000"
+      },
+      "groupName": "deployment"
+    },
+    {
       "name": "environmentStatusName",
       "type": "string",
       "label": "Status Name",
@@ -193,9 +206,9 @@
     {
       "name": "environmentAttributes",
       "type": "multiline",
-      "label": "Attributes",
+      "label": "Environment Attributes",
       "required": false,
-      "helpMarkDown": "Environment attribute values in key-value format. Ex: TODO",
+      "helpMarkDown": "Environment attribute values in key-value JSON format. Ex:\n{\n  \"OS\" : \"Linux\",\n  \"Location\" : \"Switzerland\",\n  \"Owner\" : \"me@company.com\"\n}",
       "properties": {
         "resizable": "true",
         "rows": "10",
