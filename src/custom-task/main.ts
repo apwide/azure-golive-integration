@@ -1,3 +1,4 @@
+import { EndpointAuthorization } from "azure-pipelines-task-lib";
 import tl = require("azure-pipelines-task-lib/task");
 import request = require("request-promise-native");
 
@@ -5,13 +6,24 @@ async function run() {
   try {
     const goliveConnection: string = tl.getInput("serviceConnection", true);
     const goliveBaseUrl = tl.getEndpointUrl(goliveConnection, false);
-    const apiToken = tl.getEndpointAuthorizationParameter(goliveConnection, "apitoken", false);
-
+    const authenticationScheme = tl.getEndpointAuthorizationScheme(goliveConnection, false);
+    const apiToken = tl.getEndpointAuthorizationParameter(goliveConnection, "apitoken", true);
+    const username = tl.getEndpointAuthorizationParameter(goliveConnection, "username", true);
+    const password = tl.getEndpointAuthorizationParameter(goliveConnection, "password", true);
     const autoCreate: boolean = !!tl.getInput("targetAutoCreate", false);
 
     tl.debug("goliveConnection: " + goliveConnection);
     tl.debug("goliveBaseUrl: " + goliveBaseUrl);
     tl.debug("apitoken: " + apiToken);
+    tl.debug("username: " + username);
+    tl.debug("password: " + password);
+
+    let headers;
+    if (authenticationScheme === "Token") {
+      headers = {Authorization: "Bearer " + apiToken};
+    } else {
+      headers = {Authorization: "Basic " + new Buffer(username + ":" + password).toString("base64")};
+    }
 
     async function getTargetEnvironmentId(): Promise<string> {
       const targetEnvironmentId: string = tl.getInput("targetEnvironmentId", false);
@@ -79,9 +91,7 @@ async function run() {
       const response = await request.post({
         url: goliveBaseUrl + "environment",
         strictSSL: false,
-        auth: {
-          bearer: apiToken
-        },
+        headers,
         json: {
           name,
           application: {
@@ -101,9 +111,7 @@ async function run() {
       const response = await request.post({
         url: goliveBaseUrl + "application",
         strictSSL: false,
-        auth: {
-          bearer: apiToken
-        },
+        headers,
         json: {
           name
         }
@@ -117,9 +125,7 @@ async function run() {
       const response = await request.post({
         url: goliveBaseUrl + "category",
         strictSSL: false,
-        auth: {
-          bearer: apiToken
-        },
+        headers,
         json: {
           name
         }
@@ -133,9 +139,7 @@ async function run() {
       const response = await request.post({
         url: goliveBaseUrl + "environments/search/paginated",
         strictSSL: false,
-        auth: {
-          bearer: apiToken
-        },
+        headers,
         json: {
           criteria: [
             {
@@ -155,9 +159,7 @@ async function run() {
       const response = await request.get({
         url: goliveBaseUrl + "applications",
         strictSSL: false,
-        auth: {
-          bearer: apiToken
-        }
+        headers,
       });
       const application = JSON.parse(response).find(app => app.name === applicationName);
       tl.debug("Found application: " + application);
@@ -169,9 +171,7 @@ async function run() {
       const response = await request.get({
         url: goliveBaseUrl + "categories",
         strictSSL: false,
-        auth: {
-          bearer: apiToken
-        }
+        headers,
       });
       const category = JSON.parse(response)?.find(cat => cat.name === categoryName);
       tl.debug("Found category: " + category);
@@ -193,28 +193,26 @@ async function run() {
 
         const requestBody: any = {};
 
-        if (versionName){
+        if (versionName) {
           requestBody.versionName = versionName;
         }
-        if (buildNumber){
+        if (buildNumber) {
           requestBody.buildNumber = buildNumber;
         }
-        if (description){
+        if (description) {
           requestBody.description = description;
         }
-        if (issueKeys){
-          requestBody.issueKeys = issueKeys.replace(/\s/g, "").split(",")
+        if (issueKeys) {
+          requestBody.issueKeys = issueKeys.replace(/\s/g, "").split(",");
         }
-        if (deploymentAttributes){
+        if (deploymentAttributes) {
           requestBody.attributes = parseAttributes(deploymentAttributes);
         }
 
         const response = await request.put({
           url: goliveBaseUrl + "deployment?environmentId=" + environmentId,
           strictSSL: false,
-          auth: {
-            bearer: apiToken
-          },
+          headers,
           json: requestBody
         });
         tl.debug("Deployment performed response: " + response);
@@ -239,9 +237,7 @@ async function run() {
         const response = await request.put({
           url: goliveBaseUrl + "status-change?environmentId=" + environmentId,
           strictSSL: false,
-          auth: {
-            bearer: apiToken
-          },
+          headers,
           json: {
             id: environmentStatusId,
             name: environmentStatusName
@@ -286,9 +282,7 @@ async function run() {
       const response = await request.put({
         url: goliveBaseUrl + "environment/" + environmentId,
         strictSSL: false,
-        auth: {
-          bearer: apiToken
-        },
+        headers,
         json: requestBody
       });
       tl.debug("Environment updated response: " + response);
