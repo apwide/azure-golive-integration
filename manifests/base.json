@@ -1,43 +1,200 @@
 {
-    "manifestVersion": 1,
-    "id": "MyCustomExtension{{tag}}",
-    "name": "My Custom Extension {{tag}}",
-    "icons": {
-        "default": "icon.png"
+  "manifestVersion": 1,
+  "id": "ApwideGoliveForJira{{tag}}",
+  "name": "Apwide Golive for Jira {{tag}}",
+  "icons": {
+    "default": "golive.png"
+  },
+  "version": "{{version}}",
+  "description": "Automatically push updated information of your IT environments and deployments to Jira and Apwide Golive.",
+  "publisher": "apwide",
+  "public": false,
+  "categories": [
+    "Azure Pipelines",
+    "Azure Repos"
+  ],
+  "tags": [
+    "deployment",
+    "environment",
+    "jira",
+    "integration",
+    "apwide",
+    "golive",
+    "release",
+    "management",
+    "pipeline"
+  ],
+  "content": {
+    "details": {
+      "path": "README.md"
     },
-    "version": "{{version}}",
-    "description": "This extension contains a custom build and release task.",
-    "publisher": "{{publisher}}",
-    "public": false,
-    "categories": [
-        "Azure Pipelines"
-    ],
-    "content": {
-        "details": {
-            "path": "README.md"
-        }
+    "license": {
+      "path": "LICENSE.md"
+    }
+  },
+  "links": {
+    "home": {
+      "uri": "https://www.apwide.com"
     },
-    "targets": [
-        {
-            "id": "Microsoft.VisualStudio.Services"
-        }
-    ],
-    "contributions": [
-        {
-            "id": "custom-task",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
+    "getstarted": {
+      "uri": "https://golive.apwide.com/"
+    },
+    "learn": {
+      "uri": "https://www.apwide.com/features"
+    },
+    "support": {
+      "uri": "https://www.apwide.com/support"
+    },
+    "repository": {
+      "uri": "https://github.com/apwide/azure-golive-integration"
+    },
+    "privacypolicy": {
+      "uri": "https://www.apwide.com/privacy-policy/"
+    },
+    "issues": {
+      "uri": "https://apwide.atlassian.net/servicedesk/"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/apwide/azure-golive-integration"
+  },
+  "CustomerQnASupport": {
+    "enablemarketplaceqna": true
+  },
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "service-endpoint{{tag}}",
+      "description": "Service endpoint type for Apwide Golive connections",
+      "type": "ms.vss-endpoint.service-endpoint-type",
+      "targets": [
+        "ms.vss-endpoint.endpoint-types"
+      ],
+      "properties": {
+        "name": "golive",
+        "displayName": "Apwide Golive for Jira{{tag}}",
+        "url": {
+          "displayName": "Golive Endpoint",
+          "required": true,
+          "value": "https://golive.apwide.net/api/",
+          "helpText": "Use 'https://golive.apwide.net/api/' to connect with Golive Cloud or 'https://{your-jira-base-url}/rest/apwide/tem/1.1/' when Golive is installed on Jira Server / Data Center"
+        },
+        "dataSources": [
+          {
+            "name": "TestConnection",
+            "endpointUrl": "{{endpoint.url}}applications",
+            "resultSelector": "jsonpath:$[*]"
+
+          },
+          {
+            "name": "applications",
+            "endpointUrl": "{{endpoint.url}}applications",
+            "resultSelector": "jsonpath:$[*]"
+          },
+          {
+            "name": "environments",
+            "endpointUrl": "{{endpoint.url}}environments/search/paginated?_expand=false&_limit=0",
+            "resultSelector": "jsonpath:$.environments[*]"
+          },
+          {
+            "name": "categories",
+            "endpointUrl": "{{endpoint.url}}categories",
+            "resultSelector": "jsonpath:$[*]"
+          },
+          {
+            "name": "statuses",
+            "endpointUrl": "{{endpoint.url}}statuses",
+            "resultSelector": "jsonpath:$[*]"
+          }
+        ],
+        "authenticationSchemes": [
+          {
+            "type": "ms.vss-endpoint.endpoint-auth-scheme-token",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{ endpoint.apitoken }}"
+              }
             ],
-            "properties": {
-                "name": "custom-task"
-            }
-        }
-    ],
-    "files": [
-        {
-            "path": "custom-task",
-            "addressable": true
-        }
-    ]
+            "inputDescriptors": [
+              {
+                "id": "apitoken",
+                "name": "Golive Cloud API Token",
+                "description": "Golive Cloud API Token. More information here: https://www.apwide.com/golive/cloud/environments/help/rest-api",
+                "inputMode": "textbox",
+                "isConfidential": true,
+                "validation": {
+                  "isRequired": true,
+                  "dataType": "string",
+                  "maxLength": 1024
+                }
+              }
+            ]
+          },
+          {
+            "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Basic {{ #base64 endpoint.username \":\" endpoint.password }}"
+              }
+            ],
+            "inputDescriptors": [
+              {
+                "id": "username",
+                "name": "Jira User (Golive for Jira Server / Data Center)",
+                "description": "Only when Golive is installed on Jira Server / Data Center",
+                "inputMode": "textbox",
+                "isConfidential": false,
+                "validation": {
+                  "isRequired": true,
+                  "dataType": "string",
+                  "maxLength": 300
+                }
+              },
+              {
+                "id": "password",
+                "name": "Jira Password (Golive for Jira Server / Data Center)",
+                "description": "Only when Golive is installed on Jira Server / Data Center",
+                "inputMode": "passwordbox",
+                "isConfidential": true,
+                "validation": {
+                  "isRequired": true,
+                  "dataType": "string",
+                  "maxLength": 300
+                }
+              }
+            ]
+          }
+        ],
+        "helpMarkDown": "<a href=\"url-to-documentation\" target=\"_blank\"><b>Learn More</b></a>"
+      }
+    },
+    {
+      "id": "ApwideGoliveTrackEnvironment",
+      "description": "Task to push deployment information to Apwide Golive",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "custom-task"
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "custom-task",
+      "addressable": true
+    },
+    {
+      "path": "images",
+      "addressable": true
+    }
+  ]
 }
