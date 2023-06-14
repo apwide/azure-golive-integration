@@ -144,7 +144,7 @@
       "type": "multiline",
       "label": "Description",
       "required": false,
-      "helpMarkDown": "Description of the deployment supporting basic html. Ex: \n<b>✅ Job #$(Build.BuildId) - $(Build.DefinitionName)</b>\nRequested by: $(Build.RequestedFor) \nBranch: $(Build.SourceBranchName)",
+      "helpMarkDown": "Description of the deployment (basic html tags supported). Ex: \n✅ Job #$(Build.BuildId) - $(Build.DefinitionName)\nRequested by: $(Build.RequestedFor) \nBranch: $(Build.SourceBranchName)",
       "properties": {
         "resizable": "true",
         "rows": "10",

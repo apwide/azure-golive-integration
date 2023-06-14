@@ -18,12 +18,14 @@ async function run() {
     tl.debug("username: " + username);
     tl.debug("password: " + password);
 
-    let headers;
+    const headers: any = {"content-type": "application/json"};
     if (authenticationScheme === "Token") {
-      headers = {Authorization: "Bearer " + apiToken};
+      headers.Authorization = "Bearer " + apiToken;
     } else {
-      headers = {Authorization: "Basic " + new Buffer(username + ":" + password).toString("base64")};
+      headers.Authorization = "Basic " + new Buffer(username + ":" + password).toString("base64");
     }
+
+    tl.debug("headers: " + JSON.stringify(headers));
 
     async function getTargetEnvironmentId(): Promise<string> {
       const targetEnvironmentId: string = tl.getInput("targetEnvironmentId", false);
@@ -159,7 +161,7 @@ async function run() {
       const response = await request.get({
         url: goliveBaseUrl + "applications",
         strictSSL: false,
-        headers,
+        headers
       });
       const application = JSON.parse(response).find(app => app.name === applicationName);
       tl.debug("Found application: " + application);
@@ -171,7 +173,7 @@ async function run() {
       const response = await request.get({
         url: goliveBaseUrl + "categories",
         strictSSL: false,
-        headers,
+        headers
       });
       const category = JSON.parse(response)?.find(cat => cat.name === categoryName);
       tl.debug("Found category: " + category);
@@ -301,7 +303,8 @@ async function run() {
 
     await runTask();
 
-  } catch (err) {
+  } catch
+    (err) {
     // @ts-ignore
     tl.setResult(tl.TaskResult.Failed, err.message);
   }
