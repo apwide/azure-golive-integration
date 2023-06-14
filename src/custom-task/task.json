@@ -136,8 +136,7 @@
       "type": "string",
       "label": "Build Number",
       "required": false,
-      "defaultValue": "$(Build.BuildNumber)",
-      "helpMarkDown": "Build number",
+      "helpMarkDown": "Build number. Ex: $(Build.BuildNumber)",
       "groupName": "deployment"
     },
     {
@@ -145,8 +144,7 @@
       "type": "multiline",
       "label": "Description",
       "required": false,
-      "defaultValue": "<b>✅ Job #$(Build.BuildId) - $(Build.DefinitionName)</b>\nRequested by: $(Build.RequestedFor) \nBranch: $(Build.SourceBranchName)",
-      "helpMarkDown": "Description of the deployment",
+      "helpMarkDown": "Description of the deployment supporting basic html. Ex: \n<b>✅ Job #$(Build.BuildId) - $(Build.DefinitionName)</b>\nRequested by: $(Build.RequestedFor) \nBranch: $(Build.SourceBranchName)",
       "properties": {
         "resizable": "true",
         "rows": "10",

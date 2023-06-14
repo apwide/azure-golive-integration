@@ -8,7 +8,9 @@
   "version": "{{version}}",
   "description": "Automatically push updated information of your IT environments and deployments to Jira and Apwide Golive.",
   "publisher": "apwide",
-  "public": false,
+  "galleryFlags": [
+    "{{galleryFlag}}"
+  ],
   "categories": [
     "Azure Pipelines",
     "Azure Repos"

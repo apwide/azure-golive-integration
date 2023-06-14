@@ -181,7 +181,7 @@ async function run() {
 
     async function updateDeployment({environmentId}) {
       try {
-        const versionName: string = tl.getInput("deploymentVersionName", true);
+        const versionName: string | undefined = tl.getInput("deploymentVersionName", false);
         const buildNumber: string | undefined = tl.getInput("deploymentBuildNumber", false);
         const description: string | undefined = tl.getInput("deploymentDescription", false);
         const issueKeys: string | undefined = tl.getInput("deploymentIssueKeys", false);
