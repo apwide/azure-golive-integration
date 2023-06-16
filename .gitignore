@@ -87,3 +87,5 @@ test-report.xml
 test-report.html
 test-report.json
 .env*
+/**/*.js
+/**/*.js.map
