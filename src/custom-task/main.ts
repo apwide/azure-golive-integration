@@ -1,4 +1,3 @@
-import { EndpointAuthorization } from "azure-pipelines-task-lib";
 import tl = require("azure-pipelines-task-lib/task");
 import request = require("request-promise-native");
 
@@ -6,10 +5,11 @@ async function run() {
   try {
     const goliveConnection: string = tl.getInput("serviceConnection", true);
     const goliveBaseUrl = tl.getEndpointUrl(goliveConnection, false);
-    const authenticationScheme = tl.getEndpointAuthorizationScheme(goliveConnection, false);
-    const apiToken = tl.getEndpointAuthorizationParameter(goliveConnection, "apitoken", true);
-    const username = tl.getEndpointAuthorizationParameter(goliveConnection, "username", true);
-    const password = tl.getEndpointAuthorizationParameter(goliveConnection, "password", true);
+    const serverEndpointAuth = tl.getEndpointAuthorization(goliveConnection, false);
+    const username = serverEndpointAuth.parameters.username;
+    const password = serverEndpointAuth.parameters.password;
+    const apiToken = serverEndpointAuth.parameters.apitoken;
+    const authenticationScheme = serverEndpointAuth.scheme;
     const autoCreate: boolean = !!tl.getInput("targetAutoCreate", false);
 
     tl.debug("goliveConnection: " + goliveConnection);
@@ -235,6 +235,10 @@ async function run() {
       if (!environmentId && !environmentStatusName) {
         return;
       }
+      if (!environmentStatusId && !environmentStatusName) {
+        return;
+      }
+
       try {
         const response = await request.put({
           url: goliveBaseUrl + "status-change?environmentId=" + environmentId,
@@ -305,6 +309,7 @@ async function run() {
 
   } catch
     (err) {
+    tl.error(err);
     // @ts-ignore
     tl.setResult(tl.TaskResult.Failed, err.message);
   }

@@ -1,12 +1,12 @@
 {
   "scripts": {
-    "build": "npm run tslint:fix && webpack --config=webpack.config.js --env ${BUILD_ENV}",
+    "build": "tsc && npm run tslint:fix && npm run test && webpack --config=webpack.config.js --env ${BUILD_ENV}",
     "build:package": "npm run build && npm run package",
     "clean": "rimraf ./dist",
     "clean:build": "npm run clean && npm run build",
     "tslint": "tslint --project tsconfig.json --config tslint.json",
     "tslint:fix": "tslint --project tsconfig.json --fix --config tslint.json",
-    "test": "jest --verbose --coverage --coverageDirectory=coverage/",
+    "test": "tsc && mocha src/custom-task/tests/_suite.js",
     "start": "node --no-deprecation dist/custom-task/main.js",
     "clean:task": "tfx build tasks delete --task-id 282ea6d5-b7b2-49eb-897a-a68bf88c4910 --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI}",
     "publish:task": "tfx build tasks upload --task-path dist/custom-task --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI}",
@@ -17,24 +17,24 @@
     "dev:task": "npm run build && npm run clean:publish:task --env ${BUILD_ENV}"
   },
   "devDependencies": {
-    "@types/jest": "^24.9.1",
+    "@types/mocha": "^10.0.1",
     "@types/node": "^10.17.6",
     "@types/q": "^1.5.1",
     "clean-webpack-plugin": "^1.0.0",
     "copy-webpack-plugin": "^5.1.1",
-    "jest": "^24.9.0",
-    "jest-xunit": "^1.0.11",
+    "mocha": "^10.2.0",
     "replace-in-file-webpack-plugin": "^1.0.6",
+    "request-promise-native": "^1.0.9",
     "rimraf": "^3.0.0",
     "string-replace-loader": "^2.1.1",
     "style-loader": "^1.0.0",
+    "sync-request": "^6.1.0",
     "tfx-cli": "^0.6.3",
-    "ts-jest": "^24.2.0",
     "ts-loader": "^5.3.0",
-    "ts-node": "^8.5.2",
+    "ts-node": "^10.9.1",
     "tslint": "^5.15.0",
     "tslint-loader": "3.5.4",
-    "typescript": "^3.7.2",
+    "typescript": "5.1.3",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.1.2"
   },
@@ -42,7 +42,7 @@
   "private": true,
   "version": "0.0.0",
   "dependencies": {
-    "azure-devops-node-api": "^7.2.0",
-    "azure-pipelines-task-lib": "^2.9.3"
+    "azure-devops-node-api": "10.2.2",
+    "azure-pipelines-task-lib": "4.4.0"
   }
 }

@@ -5,7 +5,7 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "sourceMap": true,
-        "outDir": "dist",
+        /*"outDir": "dist",*/
         "resolveJsonModule": true,
         "target": "ES6",
         "lib": [
@@ -13,8 +13,8 @@
             "es2017"
         ],
         "types": [
-            "jest",
-            "node"
+            "node",
+            "mocha"
         ],
         "typeRoots": ["./src/types", "node_modules/@types"],
     },
