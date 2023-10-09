@@ -1,6 +1,6 @@
 import tmrm = require("azure-pipelines-task-lib/mock-run");
 import path = require("path");
-import { MockRequest } from "./utils/MockRequest";
+import {MockRequest} from "./utils/MockRequest";
 
 const taskPath = path.join(__dirname, "..", "main.js");
 const tmr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath);
