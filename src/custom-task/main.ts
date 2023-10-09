@@ -2,6 +2,7 @@ import tl = require("azure-pipelines-task-lib/task");
 import request = require("request-promise-native");
 
 async function run() {
+
   try {
     const goliveConnection: string = tl.getInput("serviceConnection", true);
     const goliveBaseUrl = tl.getEndpointUrl(goliveConnection, false);
@@ -27,15 +28,21 @@ async function run() {
 
     tl.debug("headers: " + JSON.stringify(headers));
 
+    const golive = request.defaults({
+      baseUrl: goliveBaseUrl,
+      strictSSL: false,
+      headers
+    });
+
     async function getTargetEnvironmentId(): Promise<string> {
       const targetEnvironmentId: string = tl.getInput("targetEnvironmentId", false);
       if (targetEnvironmentId) {
         return targetEnvironmentId;
       }
 
-      const environmentName: string = tl.getInput("targetEnvironmentName", false);
-      if (environmentName) {
-        const environmentId = await getEnvironmentIdByName(environmentName);
+      const name: string = tl.getInput("targetEnvironmentName", false);
+      if (name) {
+        const environmentId = await getEnvironmentIdByName(name);
         if (environmentId) {
           return environmentId;
         }
@@ -48,7 +55,7 @@ async function run() {
           if (!categoryId) {
             return;
           }
-          return await createEnvironmentId({name: environmentName, categoryId, applicationId});
+          return await createEnvironmentId({name, categoryId, applicationId});
         }
       }
     }
@@ -59,14 +66,14 @@ async function run() {
         return targetApplicationId;
       }
 
-      const applicationName: string = tl.getInput("targetApplicationName", false);
-      if (applicationName) {
-        const applicationId = await getApplicationIdByName(applicationName);
+      const name: string = tl.getInput("targetApplicationName", false);
+      if (name) {
+        const applicationId = await getApplicationIdByName(name);
         if (applicationId) {
           return applicationId;
         }
         if (autoCreate) {
-          return await createApplicationId({name: applicationName});
+          return await createApplicationId({name});
         }
       }
     }
@@ -77,32 +84,31 @@ async function run() {
         return targetEnvironmentId;
       }
 
-      const categoryName: string = tl.getInput("targetCategoryName", false);
-      if (categoryName) {
-        const categoryId = await getCategoryIdByName(categoryName);
+      const name: string = tl.getInput("targetCategoryName", false);
+      if (name) {
+        const categoryId = await getCategoryIdByName(name);
         if (categoryId) {
           return categoryId;
         }
         if (autoCreate) {
-          return await createCategoryId({name: categoryName});
+          return await createCategoryId({name});
         }
       }
     }
 
     async function createEnvironmentId({name, applicationId, categoryId}): Promise<string | undefined> {
-      const response = await request.post({
-        url: goliveBaseUrl + "environment",
-        strictSSL: false,
-        headers,
-        json: {
-          name,
-          application: {
-            id: applicationId
-          },
-          category: {
-            id: categoryId
-          }
+      const json = {
+        name,
+        application: {
+          id: applicationId
+        },
+        category: {
+          id: categoryId
         }
+      };
+      const response = await golive.post({
+        url: "/environment",
+        json
       });
       tl.debug("Environment created response: " + response);
       console.log("Environment created response", response);
@@ -110,13 +116,10 @@ async function run() {
     }
 
     async function createApplicationId({name}): Promise<string | undefined> {
-      const response = await request.post({
-        url: goliveBaseUrl + "application",
-        strictSSL: false,
-        headers,
-        json: {
-          name
-        }
+      const json = { name };
+      const response = await golive.post({
+        url: "/application",
+        json
       });
       tl.debug("Application created response: " + response);
       console.log("Application created response", response);
@@ -124,13 +127,10 @@ async function run() {
     }
 
     async function createCategoryId({name}): Promise<string | undefined> {
-      const response = await request.post({
-        url: goliveBaseUrl + "category",
-        strictSSL: false,
-        headers,
-        json: {
-          name
-        }
+      const json = { name };
+      const response = await golive.post({
+        url: "/category",
+        json
       });
       tl.debug("Category created response: " + response);
       console.log("Category created response", response);
@@ -138,10 +138,8 @@ async function run() {
     }
 
     async function getEnvironmentIdByName(environmentName): Promise<string | undefined> {
-      const response = await request.post({
-        url: goliveBaseUrl + "environments/search/paginated",
-        strictSSL: false,
-        headers,
+      const response = await golive.post({
+        url: "/environments/search/paginated",
         json: {
           criteria: [
             {
@@ -158,11 +156,7 @@ async function run() {
     }
 
     async function getApplicationIdByName(applicationName): Promise<string | undefined> {
-      const response = await request.get({
-        url: goliveBaseUrl + "applications",
-        strictSSL: false,
-        headers
-      });
+      const response = await golive.get({ url: "/applications" });
       const application = JSON.parse(response).find(app => app.name === applicationName);
       tl.debug("Found application: " + application);
       console.log("found application", application);
@@ -170,11 +164,7 @@ async function run() {
     }
 
     async function getCategoryIdByName(categoryName): Promise<string | undefined> {
-      const response = await request.get({
-        url: goliveBaseUrl + "categories",
-        strictSSL: false,
-        headers
-      });
+      const response = await golive.get({ url: "/categories" });
       const category = JSON.parse(response)?.find(cat => cat.name === categoryName);
       tl.debug("Found category: " + category);
       console.log("found application", category);
@@ -211,10 +201,8 @@ async function run() {
           requestBody.attributes = parseAttributes(deploymentAttributes);
         }
 
-        const response = await request.put({
-          url: goliveBaseUrl + "deployment?environmentId=" + environmentId,
-          strictSSL: false,
-          headers,
+        const response = await golive.put({
+          url: `/deployment?environmentId=${environmentId}`,
           json: requestBody
         });
         tl.debug("Deployment performed response: " + response);
@@ -240,15 +228,13 @@ async function run() {
       }
 
       try {
-        const response = await request.put({
-          url: goliveBaseUrl + "status-change?environmentId=" + environmentId,
-          strictSSL: false,
-          headers,
-          json: {
-            id: environmentStatusId,
-            name: environmentStatusName
-          }
-
+        const json = {
+          id: environmentStatusId,
+          name: environmentStatusName
+        }
+        const response = await golive.put({
+          url: `/status-change?environmentId=${environmentId}`,
+          json
         });
         tl.debug("Environment Status changed response: " + response);
         console.log("Environment Status changed response", response);
@@ -285,10 +271,8 @@ async function run() {
         requestBody.attributes = parseAttributes(environmentAttributes);
       }
 
-      const response = await request.put({
-        url: goliveBaseUrl + "environment/" + environmentId,
-        strictSSL: false,
-        headers,
+      const response = await golive.put({
+        url: `/environment/${environmentId}`,
         json: requestBody
       });
       tl.debug("Environment updated response: " + response);

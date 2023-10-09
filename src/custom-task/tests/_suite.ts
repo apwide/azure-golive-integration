@@ -113,7 +113,7 @@ describe("Send Environment Infos Test Suite", () => {
 
   it("should update all", (done: Mocha.Done) => {
     const tr = runTest("withAll.js");
-    console.log(tr.stdout);
+    // console.log(tr.stdout);
     assert.equal(tr.succeeded, true);
     assertInConsole(tr, "Application created response { name: 'app', id: '12' }");
     assertInConsole(tr, "Category created response { name: 'cat', id: '13' }");

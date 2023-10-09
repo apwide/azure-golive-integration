@@ -10,7 +10,6 @@ tmr.setInput("targetEnvironmentId", "111");
 tmr.setInput("environmentStatusId", "23");
 
 const mockedRequest = new MockRequest();
-
 mockedRequest.updatedEnvironmentStatus = {status: {id: 23}};
 
 tmr.registerMock("request-promise-native", mockedRequest);
