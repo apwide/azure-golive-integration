@@ -12,13 +12,6 @@ async function run() {
     const apiToken = serverEndpointAuth.parameters.apitoken;
     const authenticationScheme = serverEndpointAuth.scheme;
     const autoCreate: boolean = !!tl.getInput("targetAutoCreate", false);
-
-    tl.debug("goliveConnection: " + goliveConnection);
-    tl.debug("goliveBaseUrl: " + goliveBaseUrl);
-    tl.debug("apitoken: " + apiToken);
-    tl.debug("username: " + username);
-    tl.debug("password: " + password);
-
     const headers: any = {"content-type": "application/json"};
     if (authenticationScheme === "Token") {
       headers.Authorization = "Bearer " + apiToken;
@@ -26,6 +19,11 @@ async function run() {
       headers.Authorization = "Basic " + new Buffer(username + ":" + password).toString("base64");
     }
 
+    tl.debug("goliveConnection: " + goliveConnection);
+    tl.debug("goliveBaseUrl: " + goliveBaseUrl);
+    tl.debug("apitoken: " + apiToken);
+    tl.debug("username: " + username);
+    tl.debug("password: " + password);
     tl.debug("headers: " + JSON.stringify(headers));
 
     const golive = request.defaults({
@@ -106,6 +104,7 @@ async function run() {
           id: categoryId
         }
       };
+      console.log(`Create environment with application ${applicationId}, category ${categoryId} and name ${name}`);
       const response = await golive.post({
         url: "/environment",
         json
@@ -116,6 +115,7 @@ async function run() {
     }
 
     async function createApplicationId({name}): Promise<string | undefined> {
+      console.log(`Create application with name ${name}`);
       const json = { name };
       const response = await golive.post({
         url: "/application",
@@ -127,6 +127,7 @@ async function run() {
     }
 
     async function createCategoryId({name}): Promise<string | undefined> {
+      console.log(`Create category with name ${name}`);
       const json = { name };
       const response = await golive.post({
         url: "/category",
@@ -231,7 +232,7 @@ async function run() {
         const json = {
           id: environmentStatusId,
           name: environmentStatusName
-        }
+        };
         const response = await golive.put({
           url: `/status-change?environmentId=${environmentId}`,
           json
@@ -242,7 +243,6 @@ async function run() {
         if (e.statusCode !== 304) {
           throw e;
         }
-        tl.debug("Environment Status unchanged");
         console.log("Environment Status unchanged");
       }
     }
@@ -291,8 +291,7 @@ async function run() {
 
     await runTask();
 
-  } catch
-    (err) {
+  } catch (err) {
     tl.error(err);
     // @ts-ignore
     tl.setResult(tl.TaskResult.Failed, err.message);
