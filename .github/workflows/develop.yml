@@ -1,0 +1,26 @@
+name: NodeJS with Webpack
+
+on:
+  push:
+    branches:
+      - "develop"
+
+jobs:
+  build:
+    name: Build azure extension and publish in development if successful
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      name: Use Node.js 16.x
+      with:
+        node-version: 16.x
+    - name: Build
+      env:
+        ADO_PAT: ${{ secrets.AZURE_CI_AOD_PAT }}
+        BUILD_ENV: development
+        ADO_ACCOUNT_URI: https://dev.azure.com/apwide
+        DEV_PUBLISHER: Apwide
+      run: |
+        npm install
+        npm run dev
