@@ -1,0 +1,50 @@
+name: NodeJS with Webpack
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  build:
+    name: Build azure extension
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      name: Use Node.js 16.x
+      with:
+        node-version: 16.x
+    - name: Build
+      run: |
+        npm install
+        npm run build
+  bump-and-publish:
+    needs: [build]
+    name: Automated Version Bump
+    if: "success() && !startsWith(github.event.head_commit.message, 'chore: version bump')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bump
+        uses: 'phips28/gh-action-bump-version@master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          major-wording: 'BREAKING'
+          default: 'minor'
+          commit-message: 'chore: version bump to {{version}}'
+      - uses: actions/setup-node@v3
+        name: Use Node.js 16.x
+        with:
+          node-version: 16.x
+      - name: Build & Publish
+        env:
+          ADO_PAT: ${{ secrets.AZURE_CI_AOD_PAT }}
+          BUILD_ENV: production
+          ADO_ACCOUNT_URI: ${{ vars.ADO_ACCOUNT_URI }}
+          DEV_PUBLISHER: ${{ vars.DEV_PUBLISHER }}
+        run: |
+          npm install
+          npm run dev
+      

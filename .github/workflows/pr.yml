@@ -1,0 +1,25 @@
+name: NodeJS with Webpack
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "!master"
+      - "!patch/**"
+
+jobs:
+  build:
+    name: Build azure extension
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      name: Use Node.js 16.x
+      with:
+        node-version: 16.x
+    - name: Build
+      env:
+        BUILD_ENV: development
+      run: |
+        npm install
+        npm run build
