@@ -22,4 +22,4 @@ jobs:
         BUILD_ENV: development
       run: |
         npm install
-        npm run build
+        TZ="Europe/Zurich" npm run build

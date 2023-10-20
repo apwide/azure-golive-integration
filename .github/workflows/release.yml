@@ -46,5 +46,5 @@ jobs:
           DEV_PUBLISHER: ${{ vars.DEV_PUBLISHER }}
         run: |
           npm install
-          npm run dev
+          TZ="Europe/Zurich" npm run dev
       
