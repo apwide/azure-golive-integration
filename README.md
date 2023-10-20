@@ -9,6 +9,8 @@ This repository contains source code, documentation and scripts required to buil
 
 1. Create a personal access token for the Azure Devops account where you would test run your task. Refer [this](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops) to learn how to create a personal access token.
 
+2. Request to have permission on different Apwide project/organization (to upload task and so on such as Apwide Organization, its projects, being member of "Project Collection Administrators" organization group, having permission to access Apwide publisher)
+
 1. Set following environment variables to enable inner loop commands-
     - `BUILD_ENV` = **development**
     - `ADO_PAT` - Your personal access token
