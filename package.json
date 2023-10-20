@@ -8,7 +8,7 @@
     "tslint:fix": "tslint --project tsconfig.json --fix --config tslint.json",
     "test": "tsc && mocha src/custom-task/tests/_suite.js",
     "start": "node --no-deprecation dist/custom-task/main.js",
-    "clean:task": "tfx build tasks delete --task-id 282ea6d5-b7b2-49eb-897a-a68bf88c4910 --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI}",
+    "clean:task": "tfx build tasks delete --task-id 282ea6d5-b7b2-49eb-897a-a68bf88c4910 --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} || true",
     "publish:task": "tfx build tasks upload --task-path dist/custom-task --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI}",
     "clean:publish:task": "npm run clean:task && npm run publish:task",
     "package": "cd dist && tfx extension create --manifest-globs base.json ${BUILD_ENV}.json --output-path ${BUILD_ENV}.vsix --publisher ${DEV_PUBLISHER} && cd ../",
