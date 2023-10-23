@@ -41,7 +41,7 @@
   },
   "name": "azure-pipelines-custom-task",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "dependencies": {
     "azure-devops-node-api": "10.2.2",
     "azure-pipelines-task-lib": "4.4.0"
