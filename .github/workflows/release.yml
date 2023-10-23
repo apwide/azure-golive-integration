@@ -16,6 +16,8 @@ jobs:
       with:
         node-version: 16.x
     - name: Build
+      env:
+        BUILD_ENV: production
       run: |
         npm install
         npm run build
