@@ -23,7 +23,7 @@ const Settings = {
 module.exports = env => {
     const validEnvs = Object.keys(Settings);
     if (!validEnvs.includes(env)) {
-        console.log(`BUILD_ENV set to ${env}`)
+        console.log(`BUILD_ENV set to ${env}`, env)
         console.error(`BUILD_ENV not set correctly. Allowed values are: ${validEnvs.join(", ")}`);
         process.exit(1);
     }
