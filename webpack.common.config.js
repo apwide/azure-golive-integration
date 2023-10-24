@@ -45,24 +45,6 @@ const FillDefaultNodeSettings = (c, env, component) => {
     return c;
 };
 
-// This replacement is required to bypass the loading for package.json
-// by azure-devops-node-api library for reading library version. This 
-// directly injects the version as text.
-const PackageJsonLoadFixer = (dir, files) => {
-    return new ReplaceInFileWebpackPlugin([
-        {
-            dir,
-            files,
-            rules: [
-                {
-                    search: /JSON\.parse.{0,50}package\.json.{0,20}version/,
-                    replace: '"7.2.0"'
-                }
-            ]
-        }
-    ]);
-};
-
 // This helps in obtaining a timestamp based version string for local development.
 const VersionStringReplacer = (dir, files) => {
     const now = new Date();
@@ -124,6 +106,5 @@ const TsLoaderRule = {
 module.exports = {
     GetTargetPath,
     FillDefaultNodeSettings,
-    PackageJsonLoadFixer,
     VersionStringReplacer
 }
