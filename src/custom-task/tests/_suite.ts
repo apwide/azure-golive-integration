@@ -4,9 +4,9 @@ import * as path from "path";
 
 function runTest(test: string) {
   const tp = path.join(__dirname, test);
-  const tr: ttm.MockTestRunner = new ttm.MockTestRunner(tp);
-  tr.run();
-  return tr;
+  const mtr: ttm.MockTestRunner = new ttm.MockTestRunner(tp);
+  mtr.run();
+  return mtr;
 }
 
 function assertInConsole(tr: ttm.MockTestRunner, text) {
@@ -17,14 +17,14 @@ describe("Send Environment Infos Test Suite", () => {
 
   before((done) => {
     process.env.ENDPOINT_URL_ID1 = "bogusURL/";
-    process.env.ENDPOINT_AUTH_ID1 = '{\"scheme\":\"apitoken\", \"parameters\": {\"apitoken\": \"mytoken123\"}}';
+    process.env.ENDPOINT_AUTH_ID1 = '{"scheme":"apitoken", "parameters": {"apitoken": "mytoken123"}}';
     process.env.ENDPOINT_AUTH_PARAMETER_ID1_APITOKEN = "mytoken123";
     process.env.ENDPOINT_AUTH_PARAMETER_ID1_SCHEME = "apitoken";
     done();
   });
 
   after(() => {
-
+    // do nothing
   });
 
   it("should succeed without performing any remote call", (done: Mocha.Done) => {

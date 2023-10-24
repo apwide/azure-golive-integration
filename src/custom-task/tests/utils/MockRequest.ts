@@ -14,7 +14,7 @@ export class MockRequest {
 
   public updatedDeployment: any;
 
-  public defaults(options: any) {
+  public defaults() {
     return this;
   }
 
