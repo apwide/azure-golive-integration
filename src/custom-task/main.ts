@@ -11,8 +11,8 @@ async function run() {
     const password = serverEndpointAuth.parameters.password;
     const apiToken = serverEndpointAuth.parameters.apitoken;
     const authenticationScheme = serverEndpointAuth.scheme;
-    const autoCreate: boolean = !!tl.getInput("targetAutoCreate", false);
-    const headers: any = {"content-type": "application/json"};
+    const autoCreate = !!tl.getInput("targetAutoCreate", false);
+    const headers: Record<string, string> = {"content-type": "application/json"};
     if (authenticationScheme === "Token") {
       headers.Authorization = "Bearer " + apiToken;
     } else {
@@ -247,10 +247,9 @@ async function run() {
       }
     }
 
-    function parseAttributes(unParsedAttributes: string): object {
+    function parseAttributes(unParsedAttributes: string): Record<string, string> {
       try {
-        const jsonAttributes = JSON.parse(unParsedAttributes);
-        return jsonAttributes;
+        return JSON.parse(unParsedAttributes);
       } catch (e) {
         throw new Error("Could not parse environment attributes: " + e);
       }
@@ -293,7 +292,6 @@ async function run() {
 
   } catch (err) {
     tl.error(err);
-    // @ts-ignore
     tl.setResult(tl.TaskResult.Failed, err.message);
   }
 }
