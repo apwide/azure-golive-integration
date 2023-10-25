@@ -14,7 +14,8 @@ export class MockRequest {
 
   public updatedDeployment: any;
 
-  public defaults() {
+  public defaults(options?: any) {
+    console.log('options: ', options)
     return this;
   }
 

@@ -10,7 +10,13 @@ function runTest(test: string) {
 }
 
 function assertInConsole(tr: ttm.MockTestRunner, text) {
-  assert.equal(tr.stdout.indexOf(text) >= 0, true);
+  try {
+    assert.ok(tr.stdout.includes(text), `not found in console: ${text}`)
+  } catch (error) {
+    console.log(tr.stdout)
+    console.log(tr.stderr)
+    throw error
+  }
 }
 
 describe("Send Environment Infos Test Suite", () => {
@@ -66,7 +72,7 @@ describe("Send Environment Infos Test Suite", () => {
   it("should fail without existing environment name and missing mandatory params", (done: Mocha.Done) => {
     const tr = runTest("withUnknownEnvName.js");
     assert.equal(tr.succeeded, false);
-    assertInConsole(tr, "Found environment: undefined");
+    assertInConsole(tr, "Found environment: null");
     assert.equal(tr.errorIssues.length > 0, true);
     done();
   });

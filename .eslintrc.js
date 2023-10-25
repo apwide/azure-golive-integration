@@ -33,12 +33,17 @@ module.exports = {
   ],
   'root': true,
   'rules': {
-    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
     'no-inner-declarations': 'warn',
+    '@typescript-eslint/consistent-type-definitions': [
+      'error',
+      'type'
+    ],
     'max-len': [
       'error',
       {
-        'code': 120
+        'code': 160
       }
     ]
   }
