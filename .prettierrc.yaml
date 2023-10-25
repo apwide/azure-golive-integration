@@ -1,0 +1,11 @@
+trailingComma: none
+tabWidth: 2
+semi: false
+singleQuote: true
+printWidth: 160
+bracketSpacing: true
+# in ts you have parenthesis for typed function params
+arrowParens: always
+quoteProps: consistent
+bracketSameLine: true
+proseWrap: preserve
