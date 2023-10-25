@@ -1,6 +1,6 @@
 import tl = require('azure-pipelines-task-lib/task')
-import {GoliveClient} from './GoliveClient'
-import {log, parseAttributes, parseIssueKeys} from './utils'
+import { GoliveClient } from './GoliveClient'
+import { log, parseAttributes, parseIssueKeys } from './utils'
 
 type GoliveInputs = {
   targetAutoCreate?: boolean
@@ -43,7 +43,6 @@ function parseInput(): GoliveInputs {
     deploymentAttributes: parseAttributes(tl.getInput('deploymentAttributes', false))
   }
 }
-
 
 async function getTargetEnvironmentId(): Promise<string> {
   if (inputs.targetEnvironmentId) {
@@ -125,13 +124,15 @@ async function getTargetCategoryId(): Promise<string> {
   }
 }
 
-async function updateDeployment({environmentId}) {
+async function updateDeployment({ environmentId }) {
   try {
-    if (!inputs.deploymentVersionName &&
+    if (
+      !inputs.deploymentVersionName &&
       !inputs.deploymentBuildNumber &&
       !inputs.deploymentDescription &&
       !inputs.deploymentIssueKeys &&
-      !inputs.deploymentAttributes) {
+      !inputs.deploymentAttributes
+    ) {
       return
     }
 
@@ -151,7 +152,7 @@ async function updateDeployment({environmentId}) {
   }
 }
 
-async function updateStatus({environmentId}) {
+async function updateStatus({ environmentId }) {
   if ((!environmentId && !inputs.environmentStatusName) || (!inputs.environmentStatusId && !inputs.environmentStatusName)) {
     return
   }
@@ -170,7 +171,7 @@ async function updateStatus({environmentId}) {
   }
 }
 
-async function updateEnvironment({environmentId}) {
+async function updateEnvironment({ environmentId }) {
   if (!inputs.environmentUrl && !inputs.environmentAttributes) {
     return
   }
@@ -185,19 +186,17 @@ let inputs: GoliveInputs
 let golive: GoliveClient
 
 async function run() {
-
   try {
     inputs = parseInput()
-    golive = new GoliveClient({serviceConnection: inputs.serviceConnection})
+    golive = new GoliveClient({ serviceConnection: inputs.serviceConnection })
 
     const environmentId = await getTargetEnvironmentId()
     if (!environmentId) {
       throw new Error('Could not get a valid target environment')
     }
-    await updateDeployment({environmentId})
-    await updateStatus({environmentId})
-    await updateEnvironment({environmentId})
-
+    await updateDeployment({ environmentId })
+    await updateStatus({ environmentId })
+    await updateEnvironment({ environmentId })
   } catch (err) {
     tl.error(err)
     tl.setResult(tl.TaskResult.Failed, err.message)

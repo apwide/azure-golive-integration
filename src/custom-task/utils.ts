@@ -28,4 +28,3 @@ export function log(message: string, param?: any | null) {
 export function debug(message: string) {
   tl.debug(message)
 }
-

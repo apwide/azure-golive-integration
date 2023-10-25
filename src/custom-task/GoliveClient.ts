@@ -1,13 +1,13 @@
 import tl = require('azure-pipelines-task-lib/task')
-import {debug} from './utils'
-import request = require("request-promise-native");
+import { debug } from './utils'
+import request = require('request-promise-native')
 
 function toBase64(value: string) {
-  return Buffer.from(value).toString("base64")
+  return Buffer.from(value).toString('base64')
 }
 
 function removeUndefined(payload: any): any {
-  Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key])
+  Object.keys(payload).forEach((key) => payload[key] === undefined && delete payload[key])
   return payload
 }
 
@@ -40,79 +40,78 @@ export type NamedReference = {
 }
 
 export class GoliveClient {
-
   private readonly golive: any
 
-  constructor({ serviceConnection  } : { serviceConnection: string }) {
-    const goliveBaseUrl = tl.getEndpointUrl(serviceConnection, false);
-    const serverEndpointAuth = tl.getEndpointAuthorization(serviceConnection, false);
-    const username = serverEndpointAuth.parameters.username;
-    const password = serverEndpointAuth.parameters.password;
-    const apiToken = serverEndpointAuth.parameters.apitoken;
-    const authenticationScheme = serverEndpointAuth.scheme;
+  constructor({ serviceConnection }: { serviceConnection: string }) {
+    const goliveBaseUrl = tl.getEndpointUrl(serviceConnection, false)
+    const serverEndpointAuth = tl.getEndpointAuthorization(serviceConnection, false)
+    const username = serverEndpointAuth.parameters.username
+    const password = serverEndpointAuth.parameters.password
+    const apiToken = serverEndpointAuth.parameters.apitoken
+    const authenticationScheme = serverEndpointAuth.scheme
     const headers: Record<string, string> = {
-      "content-type": "application/json",
-      "Authorization": authenticationScheme === "Token" ? "Bearer " + apiToken : "Basic " + toBase64(`${username}:${password}`)
-    };
+      'content-type': 'application/json',
+      'Authorization': authenticationScheme === 'Token' ? 'Bearer ' + apiToken : 'Basic ' + toBase64(`${username}:${password}`)
+    }
 
-    debug(`goliveConnection: ${serviceConnection}`);
-    debug(`goliveBaseUrl: ${goliveBaseUrl}`);
-    debug(`apitoken: ${apiToken}`);
-    debug(`username: ${username}`);
-    debug(`password: ${password}`);
-    debug(`headers: ${JSON.stringify(headers)}`);
+    debug(`goliveConnection: ${serviceConnection}`)
+    debug(`goliveBaseUrl: ${goliveBaseUrl}`)
+    debug(`apitoken: ${apiToken}`)
+    debug(`username: ${username}`)
+    debug(`password: ${password}`)
+    debug(`headers: ${JSON.stringify(headers)}`)
 
     this.golive = request.defaults({
       baseUrl: goliveBaseUrl,
       strictSSL: false,
       headers
-    });
+    })
   }
 
   async getEnvironmentByName(environmentName: string): Promise<any | null> {
     const response = await this.golive.post({
-      url: "/environments/search/paginated",
+      url: '/environments/search/paginated',
       json: {
         criteria: [
           {
-            name: "environmentName",
+            name: 'environmentName',
             values: [environmentName]
-          },
+          }
         ]
       }
-    });
-    return response?.environments?.find(env => env.name === environmentName) || null;
+    })
+    return response?.environments?.find((env) => env.name === environmentName) || null
   }
 
   async getApplicationByName(applicationName): Promise<any | null> {
-    const response = await this.golive.get({ url: "/applications" });
-    return JSON.parse(response).find(app => app.name === applicationName) || null;
+    const response = await this.golive.get({ url: '/applications' })
+    return JSON.parse(response).find((app) => app.name === applicationName) || null
   }
 
   async getCategoryByName(categoryName): Promise<any | null> {
-    const response = await this.golive.get({ url: "/categories" });
-    return JSON.parse(response)?.find(cat => cat.name === categoryName) || null;
+    const response = await this.golive.get({ url: '/categories' })
+    return JSON.parse(response)?.find((cat) => cat.name === categoryName) || null
   }
 
   async createCategory(category: any) {
     return this.golive.post({
-      url: "/category",
+      url: '/category',
       json: removeUndefined(category)
-    });
+    })
   }
 
   async createApplication(application: any) {
     return this.golive.post({
-      url: "/application",
+      url: '/application',
       json: removeUndefined(application)
-    });
+    })
   }
 
   async createEnvironment(environment: EnvironmentCreateRequest) {
     return this.golive.post({
-      url: "/environment",
+      url: '/environment',
       json: removeUndefined(environment)
-    });
+    })
   }
 
   async updateStatus(environmentId: string, status: NamedReference) {
@@ -126,7 +125,7 @@ export class GoliveClient {
     return this.golive.put({
       url: `/environment/${environmentId}`,
       json: removeUndefined(environment)
-    });
+    })
   }
 
   async deploy(environmentId: string, deployment: DeploymentRequest) {
