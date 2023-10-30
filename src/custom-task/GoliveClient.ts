@@ -1,6 +1,7 @@
 import tl = require('azure-pipelines-task-lib/task')
-import { debug } from './utils'
-import request = require('request-promise-native')
+import { debug, log } from './utils'
+import fetch from 'node-fetch'
+import * as https from 'https'
 
 function toBase64(value: string) {
   return Buffer.from(value).toString('base64')
@@ -49,8 +50,10 @@ export class GoliveClient {
     const password = serverEndpointAuth.parameters.password
     const apiToken = serverEndpointAuth.parameters.apitoken
     const authenticationScheme = serverEndpointAuth.scheme
+    const agent = new https.Agent({ rejectUnauthorized: false })
     const headers: Record<string, string> = {
       'content-type': 'application/json',
+      'accept': 'application/json',
       'Authorization': authenticationScheme === 'Token' ? 'Bearer ' + apiToken : 'Basic ' + toBase64(`${username}:${password}`)
     }
 
@@ -61,78 +64,90 @@ export class GoliveClient {
     debug(`password: ${password}`)
     debug(`headers: ${JSON.stringify(headers)}`)
 
-    this.golive = request.defaults({
-      baseUrl: goliveBaseUrl,
-      strictSSL: false,
-      headers
-    })
+    this.golive = async (path, request = {}): Promise<any> => {
+      const baseUrl = goliveBaseUrl.endsWith('/') ? goliveBaseUrl.substring(0, goliveBaseUrl.length - 1) : goliveBaseUrl
+      const response = await fetch(`${baseUrl}${path}`, {
+        ...request,
+        agent,
+        headers
+      })
+      if (response.status === 304) {
+        // not modified so return null
+        return null
+      }
+      if (!response.ok) {
+        throw new Error(await response.text())
+      } else {
+        return response.json()
+      }
+    }
   }
 
   async getEnvironmentByName(environmentName: string): Promise<any | null> {
-    const response = await this.golive.post({
-      url: '/environments/search/paginated',
-      json: {
+    const response = await this.golive('/environments/search/paginated', {
+      method: 'POST',
+      body: JSON.stringify({
         criteria: [
           {
             name: 'environmentName',
             values: [environmentName]
           }
         ]
-      }
+      })
     })
     return response?.environments?.find((env) => env.name === environmentName) || null
   }
 
   async getApplicationByName(applicationName): Promise<any | null> {
-    const response = await this.golive.get({ url: '/applications' })
+    const response = await this.golive('/applications')
     return JSON.parse(response).find((app) => app.name === applicationName) || null
   }
 
   async getCategoryByName(categoryName): Promise<any | null> {
-    const response = await this.golive.get({ url: '/categories' })
+    const response = await this.golive('/categories')
     return JSON.parse(response)?.find((cat) => cat.name === categoryName) || null
   }
 
   async createCategory(category: any) {
-    return this.golive.post({
-      url: '/category',
-      json: removeUndefined(category)
+    return this.golive('/category', {
+      method: 'POST',
+      body: JSON.stringify(removeUndefined(category))
     })
   }
 
   async createApplication(application: any) {
-    return this.golive.post({
-      url: '/application',
-      json: removeUndefined(application)
+    return this.golive('/application', {
+      method: 'POST',
+      body: JSON.stringify(removeUndefined(application))
     })
   }
 
   async createEnvironment(environment: EnvironmentCreateRequest) {
-    return this.golive.post({
-      url: '/environment',
-      json: removeUndefined(environment)
+    return this.golive('/environment', {
+      method: 'POST',
+      body: JSON.stringify(removeUndefined(environment))
     })
   }
 
   async updateStatus(environmentId: string, status: NamedReference) {
-    return this.golive.put({
-      url: `/status-change?environmentId=${environmentId}`,
-      json: status
+    return this.golive(`/status-change?environmentId=${environmentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(status)
     })
   }
 
   async updateEnvironment(environmentId: string, environment: EnvironmentUpdateRequest) {
-    return this.golive.put({
-      url: `/environment/${environmentId}`,
-      json: removeUndefined(environment)
+    return this.golive(`/environment/${environmentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(removeUndefined(environment))
     })
   }
 
   async deploy(environmentId: string, deployment: DeploymentRequest) {
     // TODO delete undefined keys ?
-    return this.golive.put({
-      url: `/deployment?environmentId=${environmentId}`,
-      json: removeUndefined(deployment)
+    return this.golive(`/deployment?environmentId=${environmentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(removeUndefined(deployment))
     })
   }
 }
