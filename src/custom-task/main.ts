@@ -126,26 +126,23 @@ async function getTargetCategoryId(): Promise<string> {
 }
 
 async function updateDeployment({ environmentId }) {
-  try {
-    const issueKeys = await findIssueKeys()
+  const issueKeys = await findIssueKeys()
 
-    if (!inputs.deploymentVersionName && !inputs.deploymentBuildNumber && !inputs.deploymentDescription && !inputs.deploymentAttributes && !issueKeys.length) {
-      return
-    }
+  if (!inputs.deploymentVersionName && !inputs.deploymentBuildNumber && !inputs.deploymentDescription && !inputs.deploymentAttributes && !issueKeys.length) {
+    return
+  }
 
-    const deployment = await golive.deploy(environmentId, {
-      versionName: inputs.deploymentVersionName,
-      buildNumber: inputs.deploymentBuildNumber,
-      description: inputs.deploymentDescription,
-      attributes: inputs.deploymentAttributes,
-      issueKeys
-    })
-    log('Deployment performed response', deployment)
-  } catch (e) {
-    if (e.statusCode !== 304) {
-      throw e
-    }
+  const deployment = await golive.deploy(environmentId, {
+    versionName: inputs.deploymentVersionName,
+    buildNumber: inputs.deploymentBuildNumber,
+    description: inputs.deploymentDescription,
+    attributes: inputs.deploymentAttributes,
+    issueKeys
+  })
+  if (!deployment) {
     log('Environment Deployment unchanged')
+  } else {
+    log('Deployment performed response', deployment)
   }
 }
 
@@ -154,17 +151,14 @@ async function updateStatus({ environmentId }) {
     return
   }
 
-  try {
-    const status = await golive.updateStatus(environmentId, {
-      id: inputs.environmentStatusId,
-      name: inputs.environmentStatusName
-    })
-    log('Environment Status changed response', status)
-  } catch (e) {
-    if (e.statusCode !== 304) {
-      throw e
-    }
+  const status = await golive.updateStatus(environmentId, {
+    id: inputs.environmentStatusId,
+    name: inputs.environmentStatusName
+  })
+  if (!status) {
     log('Environment Status unchanged')
+  } else {
+    log('Environment Status changed response', status)
   }
 }
 

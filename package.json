@@ -35,11 +35,8 @@
     "mocha": "10.2.0",
     "prettier": "3.0.3",
     "replace-in-file-webpack-plugin": "1.0.6",
-    "request-promise-native": "^1.0.9",
     "rimraf": "5.0.5",
     "string-replace-loader": "3.1.0",
-    "style-loader": "3.3.3",
-    "sync-request": "^6.1.0",
     "tfx-cli": "0.16.0",
     "ts-loader": "9.5.0",
     "ts-node": "10.9.1",
@@ -53,6 +50,7 @@
   "version": "0.0.0",
   "dependencies": {
     "azure-devops-node-api": "12.1.0",
-    "azure-pipelines-task-lib": "4.6.1"
+    "azure-pipelines-task-lib": "4.6.1",
+    "node-fetch": "3.3.2"
   }
 }
