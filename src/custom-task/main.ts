@@ -1,6 +1,7 @@
 import tl = require('azure-pipelines-task-lib/task')
 import { GoliveClient } from './GoliveClient'
-import { log, parseAttributes, parseIssueKeys } from './utils'
+import { extractIssueKeys, log, parseAttributes, parseIssueKeys, unique } from './utils'
+import { getAzureClient } from './AzureClient'
 
 type GoliveInputs = {
   targetAutoCreate?: boolean
@@ -126,13 +127,9 @@ async function getTargetCategoryId(): Promise<string> {
 
 async function updateDeployment({ environmentId }) {
   try {
-    if (
-      !inputs.deploymentVersionName &&
-      !inputs.deploymentBuildNumber &&
-      !inputs.deploymentDescription &&
-      !inputs.deploymentIssueKeys &&
-      !inputs.deploymentAttributes
-    ) {
+    const issueKeys = await findIssueKeys()
+
+    if (!inputs.deploymentVersionName && !inputs.deploymentBuildNumber && !inputs.deploymentDescription && !inputs.deploymentAttributes && !issueKeys.length) {
       return
     }
 
@@ -140,8 +137,8 @@ async function updateDeployment({ environmentId }) {
       versionName: inputs.deploymentVersionName,
       buildNumber: inputs.deploymentBuildNumber,
       description: inputs.deploymentDescription,
-      issueKeys: inputs.deploymentIssueKeys,
-      attributes: inputs.deploymentAttributes
+      attributes: inputs.deploymentAttributes,
+      issueKeys
     })
     log('Deployment performed response', deployment)
   } catch (e) {
@@ -182,6 +179,23 @@ async function updateEnvironment({ environmentId }) {
   log('Environment updated response', env)
 }
 
+async function findIssueKeys() {
+  if (inputs.deploymentIssueKeys) {
+    return inputs.deploymentIssueKeys
+  }
+  const azureClient = await getAzureClient()
+  const fromBuildId = parseInt(tl.getVariable('Build.BuildId'))
+  const oldestFailedBuild = await azureClient.getOldestFailedBuildDifferentThan(fromBuildId)
+
+  log(`Previous oldest failed build was ${oldestFailedBuild?.id}`)
+
+  const fromCommitId = tl.getVariable('Build.SourceVersion')
+  const toCommitId = oldestFailedBuild?.sourceVersion || fromCommitId
+  const commits = await azureClient.getCommits(fromCommitId, toCommitId)
+  log(`${commits.length} commits found`)
+  return unique(commits.flatMap((commit) => extractIssueKeys(commit.comment)))
+}
+
 let inputs: GoliveInputs
 let golive: GoliveClient
 
@@ -194,6 +208,7 @@ async function run() {
     if (!environmentId) {
       throw new Error('Could not get a valid target environment')
     }
+
     await updateDeployment({ environmentId })
     await updateStatus({ environmentId })
     await updateEnvironment({ environmentId })
