@@ -1,25 +1,29 @@
 {
-    "compileOnSave": true,
-    "compilerOptions": {
-        "noEmitOnError": true,
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "sourceMap": true,
-        /*"outDir": "dist",*/
-        "resolveJsonModule": true,
-        "target": "es2021",
-        "lib": [
-            "ES2021",
-          "DOM"
-        ],
-        "types": [
-            "node",
-            "mocha"
-        ],
-        "typeRoots": ["./src/types", "node_modules/@types"],
-    },
-    "include": [
-        "src/**/*.ts",
-        "tests/**/*.ts"
+  "compileOnSave": true,
+  "compilerOptions": {
+    "outDir": "build/",
+    "noEmitOnError": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "target": "es2021",
+    "lib": [
+      "ES2021",
+      "DOM"
+    ],
+    "types": [
+      "node",
+      "mocha"
+    ],
+    "typeRoots": [
+      "./src/types",
+      "node_modules/@types"
     ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.json",
+//    "tests/**/*.ts"
+  ]
 }
