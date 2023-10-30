@@ -242,7 +242,7 @@
     }
   ],
   "execution": {
-    "Node": {
+    "Node16": {
       "target": "main.js",
       "argumentFormat": ""
     },
