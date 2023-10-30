@@ -53,6 +53,7 @@ dist-timeline/
 dist-timeline-insight/
 dist-cloud-timeline/
 dist-light/
+/build/
 
 /tests/e2e/videos/
 /tests/e2e/screenshots/
