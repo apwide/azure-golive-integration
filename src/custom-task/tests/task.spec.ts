@@ -1,7 +1,6 @@
 import * as assert from 'assert'
 import * as ttm from 'azure-pipelines-task-lib/mock-test'
 import * as path from 'path'
-import { extractIssueKeys } from '../utils'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function runTest(test: string, done: Mocha.Done, validate: (t: ttm.MockTestRunner) => void = () => {}) {
@@ -20,6 +19,10 @@ function runTest(test: string, done: Mocha.Done, validate: (t: ttm.MockTestRunne
 
 function assertInConsole(tr: ttm.MockTestRunner, text) {
   assert.ok(tr.stdout.includes(text), `not found in console: ${text}`)
+}
+
+function assertNotInConsole(tr: ttm.MockTestRunner, text) {
+  assert.ok(!tr.stdout.includes(text), `found in console but should not: ${text}`)
 }
 
 describe('Send Environment Infos Test Suite', () => {
@@ -150,9 +153,28 @@ describe('Send Environment Infos Test Suite', () => {
     })
   })
 
-  it('should find issue keys', (done: Mocha.Done) => {
-    const issueKeys = extractIssueKeys('here is my commit message: TEM-123 - TEM-234')
-    assert.equal(`${issueKeys}`, `${['TEM-123', 'TEM-234']}`)
-    done()
+  it('should parse commit for issue keys', (done: Mocha.Done) => {
+    runTest('withCommitIssueKeys.js', done, (tr) => {
+      assert.equal(tr.succeeded, true)
+      assertNotInConsole(tr, 'Loading Issue keys from input')
+      assertInConsole(tr, "Found issue keys [ 'TEM-10', 'TEM-100', 'TEM-200' ]")
+    })
+  })
+
+  it('should avoid parsing commit when disabled', (done: Mocha.Done) => {
+    runTest('withDisabledParsing.js', done, (tr) => {
+      assert.equal(tr.succeeded, true)
+      assertNotInConsole(tr, 'Loading Issue keys from commits')
+      assertInConsole(tr, 'Found issue keys []')
+    })
+  })
+
+  it('should parse commit even if input issue keys provided', (done: Mocha.Done) => {
+    runTest('withInputAndCommitIssueKeys.js', done, (tr) => {
+      assert.equal(tr.succeeded, true)
+      assertInConsole(tr, 'Loading Issue keys from input')
+      assertInConsole(tr, 'Loading Issue keys from commits')
+      assertInConsole(tr, "Found issue keys [ 'TEM-900', 'TEM-902', 'TEM-10', 'TEM-100' ]")
+    })
   })
 })

@@ -161,6 +161,15 @@
       "groupName": "deployment"
     },
     {
+      "name": "deploymentIssueKeysFromCommit",
+      "type": "boolean",
+      "default": true,
+      "label": "Issue Keys from Commit",
+      "required": false,
+      "helpMarkDown": "Should parse commit messages to populate issue keys",
+      "groupName": "deployment"
+    },
+    {
       "name": "deploymentAttributes",
       "type": "multiline",
       "label": "Deployment Attributes",

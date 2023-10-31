@@ -75,10 +75,17 @@ export class GoliveClient {
         // not modified so return null
         return null
       }
+      // if (response.status === 404) {
+      //   // not found so null
+      //   return null
+      // }
+      debug(`status of call to ${path} was ${response.status}`)
       if (!response.ok) {
         throw new Error(await response.text())
       } else {
-        return response.json()
+        const body = await response.text()
+        debug(`response payload of call to ${path} was: ${body}`)
+        return body && body.length ? JSON.parse(body) : undefined
       }
     }
   }
@@ -99,13 +106,13 @@ export class GoliveClient {
   }
 
   async getApplicationByName(applicationName): Promise<any | null> {
-    const response = await this.golive('/applications')
-    return JSON.parse(response).find((app) => app.name === applicationName) || null
+    const apps = (await this.golive('/applications')) || []
+    return apps.find((app) => app.name === applicationName) || null
   }
 
   async getCategoryByName(categoryName): Promise<any | null> {
-    const response = await this.golive('/categories')
-    return JSON.parse(response)?.find((cat) => cat.name === categoryName) || null
+    const cats = (await this.golive('/categories')) || []
+    return cats.find((cat) => cat.name === categoryName) || null
   }
 
   async createCategory(category: any) {
@@ -144,7 +151,6 @@ export class GoliveClient {
   }
 
   async deploy(environmentId: string, deployment: DeploymentRequest) {
-    // TODO delete undefined keys ?
     return this.golive(`/deployment?environmentId=${environmentId}`, {
       method: 'PUT',
       body: JSON.stringify(removeUndefined(deployment))
