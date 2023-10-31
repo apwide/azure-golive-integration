@@ -65,6 +65,9 @@ If your pipeline is performing deployments, you can send the information of the 
 
 ![AzureCustomTaskDeploymentInformation.png.png](images/AzureCustomTaskDeploymentInformation.png.png)
 
+The "Issue Keys from Commit" option enables the parsing of commit messages to identify the issue keys that should be added to the deployment.
+The task will go through all commits made from the current job to the last successful job.
+
 ### Update Environment Status
 If you want to update the status of the Golive environment (ex: when starting a deployment, after a deployment has been performed,…), open the “Update Status” section. Pick the desired status or type its name:
 

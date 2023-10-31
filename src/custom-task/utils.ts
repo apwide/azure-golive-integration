@@ -12,7 +12,7 @@ export function parseIssueKeys(issueKeys?: string): string[] | undefined {
   if (!issueKeys) {
     return undefined
   }
-  issueKeys.replace(/\s/g, '').split(',')
+  return issueKeys.replace(/\s/g, '').split(',')
 }
 
 export function log(message: string, param?: any | null) {

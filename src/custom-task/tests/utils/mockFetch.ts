@@ -19,6 +19,10 @@ function mockFetch(
       return {
         status: 200,
         ok: true,
+        async text() {
+          const json = await this.json()
+          return json ? JSON.stringify(json) : undefined
+        },
         async json() {
           if (options.method?.toLowerCase() === 'post') {
             console.log('Mock answer of this POST:', options)
@@ -57,13 +61,13 @@ function mockFetch(
               return data.get()
             }
             if (url.includes('/environments/search/paginated')) {
-              return JSON.stringify({ environments: data.foundEnvironments })
+              return { environments: data.foundEnvironments }
             }
             if (url.includes('/applications')) {
-              return JSON.stringify(data.foundApplications)
+              return data.foundApplications
             }
             if (url.includes('/categories')) {
-              return JSON.stringify(data.foundCategories)
+              return data.foundCategories
             }
           }
         }

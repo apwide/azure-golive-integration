@@ -21,6 +21,7 @@ type GoliveInputs = {
   deploymentBuildNumber?: string
   deploymentDescription?: string
   deploymentIssueKeys?: string[]
+  deploymentIssueKeysFromCommit: boolean
   deploymentAttributes?: Record<string, string>
 }
 
@@ -41,6 +42,7 @@ function parseInput(): GoliveInputs {
     deploymentBuildNumber: tl.getInput('deploymentBuildNumber', false),
     deploymentDescription: tl.getInput('deploymentDescription', false),
     deploymentIssueKeys: parseIssueKeys(tl.getInput('deploymentIssueKeys', false)),
+    deploymentIssueKeysFromCommit: tl.getBoolInput('deploymentIssueKeysFromCommit', false),
     deploymentAttributes: parseAttributes(tl.getInput('deploymentAttributes', false))
   }
 }
@@ -128,6 +130,8 @@ async function getTargetCategoryId(): Promise<string> {
 async function updateDeployment({ environmentId }) {
   const issueKeys = await findIssueKeys()
 
+  log('Found issue keys', issueKeys)
+
   if (!inputs.deploymentVersionName && !inputs.deploymentBuildNumber && !inputs.deploymentDescription && !inputs.deploymentAttributes && !issueKeys.length) {
     return
   }
@@ -173,21 +177,28 @@ async function updateEnvironment({ environmentId }) {
   log('Environment updated response', env)
 }
 
-async function findIssueKeys() {
+async function findIssueKeys(): Promise<string[]> {
+  let issueKeys = []
   if (inputs.deploymentIssueKeys) {
-    return inputs.deploymentIssueKeys
+    log('Loading Issue keys from input')
+    issueKeys = [...issueKeys, ...inputs.deploymentIssueKeys]
   }
-  const azureClient = await getAzureClient()
-  const fromBuildId = parseInt(tl.getVariable('Build.BuildId'))
-  const oldestFailedBuild = await azureClient.getOldestFailedBuildDifferentThan(fromBuildId)
+  if (inputs.deploymentIssueKeysFromCommit) {
+    log('Loading Issue keys from commits')
+    const azureClient = await getAzureClient()
+    const fromBuildId = parseInt(tl.getVariable('Build.BuildId'))
+    const oldestFailedBuild = await azureClient.getOldestFailedBuildDifferentThan(fromBuildId)
 
-  log(`Previous oldest failed build was ${oldestFailedBuild?.id}`)
+    log(`Previous oldest failed build was ${oldestFailedBuild?.id}`)
 
-  const fromCommitId = tl.getVariable('Build.SourceVersion')
-  const toCommitId = oldestFailedBuild?.sourceVersion || fromCommitId
-  const commits = await azureClient.getCommits(fromCommitId, toCommitId)
-  log(`${commits.length} commits found`)
-  return unique(commits.flatMap((commit) => extractIssueKeys(commit.comment)))
+    const fromCommitId = tl.getVariable('Build.SourceVersion')
+    const toCommitId = oldestFailedBuild?.sourceVersion || fromCommitId
+    const commits = await azureClient.getCommits(fromCommitId, toCommitId)
+    log(`${commits.length} commits found`)
+    const commitIssueKeys = commits.flatMap((commit) => extractIssueKeys(commit.comment))
+    issueKeys = [...issueKeys, ...commitIssueKeys]
+  }
+  return unique(issueKeys)
 }
 
 let inputs: GoliveInputs

@@ -9,7 +9,7 @@
     "lint:fix": "npm run lint --fix",
     "lint:format": "prettier --check src",
     "fix:format": "prettier --write src",
-    "test": "mocha build/tests/_suite.js",
+    "test": "mocha build/tests/**/*.spec.js",
     "start": "node --no-deprecation dist/custom-task/main.js",
     "create:task": "tfx build tasks create --task-id 282ea6d5-b7b2-49eb-897a-a68bf88c4910 --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} || true",
     "clean:task": "tfx build tasks delete --task-id 282ea6d5-b7b2-49eb-897a-a68bf88c4910 --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} || true",

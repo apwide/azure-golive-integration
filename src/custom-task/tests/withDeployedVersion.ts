@@ -1,7 +1,7 @@
 import tmrm = require('azure-pipelines-task-lib/mock-run')
 import path = require('path')
-import NullAzureClient from './utils/MockAzureClient'
 import mockFetch = require('./utils/mockFetch')
+import { mockAzureClient } from './utils/mockAzureClient'
 
 const taskPath = path.join(__dirname, '..', 'main.js')
 const tmr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath)
@@ -18,6 +18,6 @@ tmr.registerMock(
     }
   })
 )
-tmr.registerMock('./AzureClient', NullAzureClient)
+tmr.registerMock('./AzureClient', mockAzureClient())
 
 tmr.run()

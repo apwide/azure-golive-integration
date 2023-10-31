@@ -7,9 +7,23 @@ const taskPath = path.join(__dirname, '..', 'main.js')
 const tmr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath)
 
 tmr.setInput('serviceConnection', 'ID1')
-tmr.setInput('targetEnvironmentId', '113')
+tmr.setInput('targetEnvironmentId', '1')
+tmr.setInput('deploymentIssueKeys', 'TEM-900,TEM-902')
+tmr.setInput('deploymentIssueKeysFromCommit', 'true')
 
 tmr.registerMock('node-fetch', mockFetch())
-tmr.registerMock('./AzureClient', mockAzureClient())
+tmr.registerMock(
+  './AzureClient',
+  mockAzureClient({
+    commits: [
+      {
+        comment: 'chore(vue): update composition API - TEM-10/TEM-100'
+      },
+      {
+        comment: 'chore(vue): update 2 composition API - TEM-10/TEM-900'
+      }
+    ]
+  })
+)
 
 tmr.run()
