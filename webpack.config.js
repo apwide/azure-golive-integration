@@ -1,24 +1,11 @@
 const path = require('path')
 const CopyPlugin = require('copy-webpack-plugin')
+const webpack = require('webpack')
 const ReplaceInFileWebpackPlugin = require('replace-in-file-webpack-plugin')
-const WebpackCommon = require('./webpack.common.config')
+const { ComputeVersion } = require('./webpack.common.config')
+const Settings = require('./taskSettings')
 
-const Target = WebpackCommon.GetTargetPath()
-
-const Settings = {
-  'production': {
-    Tag: '',
-    TaskGuid: 'c5ed4c98-e170-4820-877d-cf58c5ee2fcd',
-    GalleryFlag: 'Public'
-  },
-  'development': {
-    Tag: 'Dev',
-    TaskGuid: '282ea6d5-b7b2-49eb-897a-a68bf88c4910',
-    GalleryFlag: 'Private'
-  }
-  // Can add more flavors here as needed. For example, a flavor for pre-production
-}
-
+const Target = path.resolve("./dist")
 
 module.exports = env => {
   const buildEnv = process.env.BUILD_ENV
@@ -29,13 +16,119 @@ module.exports = env => {
     process.exit(1)
   }
 
-  const config = {
+  const { major, minor, patch, full } = ComputeVersion()
+  console.log(`Version: ${full}`);
 
-    entry: {
-      'main': './src/custom-task/main.ts'
+  return {
+    target: 'node',
+    mode: 'production',
+    devtool: 'inline-source-map',
+    // Do not minimize files by default because non-minimized
+    // files are easier to read and hence easier to debug
+    optimization: {
+      minimize: false
     },
-
+    // Webpack overrides "__dirname" to "/" by default. We need the behavior
+    // to be similar to Node's behavior where it refers to the current working directory
+    node: {
+      __dirname: false
+    },
+    resolve: {
+      modules: ['node_modules'],
+      extensions: ['.ts', '.js']
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts?$/,
+          exclude: /node_modules/,
+          enforce: 'pre',
+          use: [
+            {
+              loader: 'ts-loader',
+              options: {
+                configFile: 'tsconfig.json'
+              }
+            }
+          ]
+        }
+      ]
+    },
+    entry: {
+      'custom-task': {
+        import: './src/custom-task/main.ts',
+        filename: 'custom-task/main.js'
+      }
+    },
+    // output: {
+    //   filename: (pathData, assetInfo) => {
+    //     console.log('[JULIEN] output filename', pathData, assetInfo)
+    //     return '[name].js'
+    //   },
+    //   path: path.join(Target)
+    // },
     plugins: [
+      new webpack.optimize.LimitChunkCountPlugin({
+        maxChunks: 1
+      }),
+
+      // extension
+      new CopyPlugin({
+        patterns: [
+          {
+            from: path.join(__dirname, './manifests/base.json'),
+            to: Target
+          },
+          {
+            from: path.join(__dirname, './src/**/*.md'),
+            to: () => `${Target}/[name][ext]`
+          },
+          {
+            from: path.join(__dirname, './src/images'),
+            to: path.join(Target, 'images')
+          },
+          {
+            from: path.join(__dirname, './images/golive.png'),
+            to: Target
+          }
+        ]
+      }),
+      new ReplaceInFileWebpackPlugin([
+        {
+          dir: Target,
+          files: [
+            'base.json'
+          ],
+          rules: [
+            {
+              search: /{{tag}}/ig,
+              replace: Settings[buildEnv].Tag
+            },
+            {
+              search: /{{galleryFlag}}/ig,
+              replace: Settings[buildEnv].GalleryFlag
+            },
+            {
+              search: /{{version}}/ig,
+              replace: full
+            },
+            {
+              search: /({{major}}|\"{{major}}\")/ig,
+              replace: major
+            },
+            {
+              search: /({{minor}}|\"{{minor}}\")/ig,
+              replace: minor
+            },
+            {
+              search: /({{patch}}|\"{{patch}}\")/ig,
+              replace: patch
+            }
+          ]
+        }
+      ]),
+
+      // task
       new CopyPlugin({
         patterns: [
           // These files are needed by azure-pipelines-task-lib library.
@@ -55,50 +148,14 @@ module.exports = env => {
           {
             from: path.join(__dirname, './images/task.png'),
             to: path.join(Target, 'custom-task', 'icon.png')
-          },
-          {
-            from: path.join(__dirname, './manifests/base.json'),
-            to: Target
-          },
-          {
-            from: path.join(__dirname, './manifests', `${buildEnv}.json`),
-            to: Target
-          },
-          {
-            from: path.join(__dirname, './images/golive.png'),
-            to: Target
-          },
-          {
-            from: path.join(__dirname, './images/task.png'),
-            to: Target
-          },
-          {
-            from: path.join(__dirname, './src/README.md'),
-            to: Target
-          },
-          {
-            from: path.join(__dirname, './src/LICENSE.md'),
-            to: Target
-          },
-          {
-            from: path.join(__dirname, './src/images'),
-            to: path.join(Target, 'images')
           }
         ]
       }),
-
-      WebpackCommon.VersionStringReplacer(Target, [
-        'custom-task/task.json',
-        'base.json'
-      ]),
-
       new ReplaceInFileWebpackPlugin([
         {
           dir: Target,
           files: [
-            'custom-task/main.js',
-            'custom-task/task.json',
-            'base.json'
+            'custom-task/main.js'
           ],
           rules: [
             // This replacement is required to allow azure-pipelines-task-lib to load the
@@ -107,6 +164,16 @@ module.exports = env => {
               search: /__webpack_require__\(.*\)\(resourceFile\)/,
               replace: 'require(resourceFile)'
             },
+          ]
+        }
+      ]),
+      new ReplaceInFileWebpackPlugin([
+        {
+          dir: Target,
+          files: [
+            'custom-task/task.json'
+          ],
+          rules: [
             {
               search: /{{taskid}}/ig,
               replace: Settings[buildEnv].TaskGuid
@@ -116,14 +183,24 @@ module.exports = env => {
               replace: Settings[buildEnv].Tag
             },
             {
-              search: /{{galleryFlag}}/ig,
-              replace: Settings[buildEnv].GalleryFlag
+              search: /{{version}}/ig,
+              replace: full
+            },
+            {
+              search: /({{major}}|\"{{major}}\")/ig,
+              replace: major
+            },
+            {
+              search: /({{minor}}|\"{{minor}}\")/ig,
+              replace: minor
+            },
+            {
+              search: /({{patch}}|\"{{patch}}\")/ig,
+              replace: patch
             }
           ]
         }
       ])
     ]
   }
-
-  return WebpackCommon.FillDefaultNodeSettings(config, buildEnv, 'custom-task')
 }
