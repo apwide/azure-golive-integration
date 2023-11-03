@@ -1,7 +1,7 @@
 import tmrm = require('azure-pipelines-task-lib/mock-run')
 import path = require('path')
-import mockFetch = require('./utils/mockFetch')
-import { mockAzureClient } from './utils/mockAzureClient'
+import mockFetch = require('../../tests/mockFetch')
+import { mockAzureClient } from '../../tests/mockAzureClient'
 
 const taskPath = path.join(__dirname, '..', 'main.js')
 const tmr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath)
@@ -13,7 +13,7 @@ tmr.setInput('deploymentIssueKeysFromCommitHistory', 'true')
 
 tmr.registerMock('node-fetch', mockFetch())
 tmr.registerMock(
-  './AzureClient',
+  '../core/AzureClient',
   mockAzureClient({
     commits: [
       {

@@ -254,9 +254,6 @@
     "Node16": {
       "target": "main.js",
       "argumentFormat": ""
-    },
-    "PowerShell3": {
-      "target": "sample.ps1"
     }
   }
 }

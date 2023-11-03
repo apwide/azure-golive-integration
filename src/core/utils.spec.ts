@@ -1,5 +1,5 @@
 import * as assert from 'assert'
-import { extractIssueKeys } from '../utils'
+import { extractIssueKeys } from './utils'
 
 describe('Parse Commit Message for Issue Keys', () => {
   it('should find issue keys', (done: Mocha.Done) => {

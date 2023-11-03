@@ -1,7 +1,7 @@
 import tl = require('azure-pipelines-task-lib/task')
-import { GoliveClient } from './GoliveClient'
-import { extractIssueKeys, log, parseAttributes, parseIssueKeys, unique } from './utils'
-import { getAzureClient } from './AzureClient'
+import { GoliveClient } from '../core/GoliveClient'
+import { extractIssueKeys, log, parseAttributes, parseIssueKeys, unique } from '../core/utils'
+import { getAzureClient } from '../core/AzureClient'
 
 type GoliveInputs = {
   targetAutoCreate?: boolean
