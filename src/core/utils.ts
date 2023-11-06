@@ -15,6 +15,19 @@ export function parseIssueKeys(issueKeys?: string): string[] | undefined {
   return issueKeys.replace(/\s/g, '').split(',')
 }
 
+export function parseDefaultBoolean(optionName: string, value?: string): boolean | undefined {
+  if (!value || value === 'default') {
+    return undefined
+  }
+  if (value.toLocaleLowerCase() === 'yes') {
+    return true
+  }
+  if (value.toLocaleLowerCase() === 'no') {
+    return false
+  }
+  throw new Error(`Unknown value ${value} for option ${optionName}`)
+}
+
 export function log(message: string, param?: any | null) {
   if (typeof param === 'undefined') {
     console.log(message)
@@ -45,4 +58,22 @@ export function extractIssueKeys(text: string): string[] {
 
 export function unique(values: string[]): string[] {
   return Array.from(new Set(values))
+}
+
+export function fixDate(date?: string) {
+  // azure-pipelines-task-lib seems to automatically transform string with a ISO-8601 date format
+  // from 2023-01-24T12:00:00Z to 01/24/2023 12:00:00
+  // so we do the reverse
+  const matches = (date || '').match(/(\d{2})\/(\d{2})\/(\d{4})\s{1}(\d{2}):(\d{2}):(\d{2})/)
+  if (!matches?.length) {
+    return date
+  }
+  const M = matches[1]
+  const d = matches[2]
+  const y = matches[3]
+  const H = matches[4]
+  const m = matches[5]
+  const s = matches[6]
+
+  return `${y}-${M}-${d}T${H}:${m}:${s}Z`
 }

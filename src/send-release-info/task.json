@@ -1,0 +1,175 @@
+{
+  "id": "{{taskid}}",
+  "name": "ApwideGoliveSendReleaseInfos{{tag}}",
+  "friendlyName": "Apwide Golive Release{{tag}}",
+  "description": "Send release information to Apwide Golive for Jira",
+  "author": "apwide",
+  "helpMarkDown": "Learn more about Apwide Golive and Environment Tracking [here](https://www.apwide.com/documentation/cloud/track-environments)",
+  "category": "Build",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [],
+  "version": {
+    "Major": "{{major}}",
+    "Minor": "{{minor}}",
+    "Patch": "{{patch}}"
+  },
+  "minimumAgentVersion": "1.95.0",
+  "instanceNameFormat": "Service Endpoint Build Task $(project)",
+  "groups": [
+    {
+      "name": "target",
+      "displayName": "Target Application",
+      "isExpanded": true
+    },
+    {
+      "name": "version",
+      "displayName": "Version",
+      "isExpanded": true
+    },
+    {
+      "name": "scope",
+      "displayName": "Scope",
+      "isExpanded": true
+    }
+  ],
+  "inputs": [
+    {
+      "name": "serviceConnection",
+      "type": "connectedService:golive",
+      "label": "Service Connection",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Apwide Golive for Jira connection to use. If needed, select 'Project settings', and create a new 'Service Connection' of type 'Apwide Golive for Jira'."
+    },
+    {
+      "name": "targetApplicationName",
+      "type": "string",
+      "label": "Application Name",
+      "required": false,
+      "helpMarkDown": "Type the name of the application to select or create the target environment. \nA new Application will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage applications in order to automatically create new applications.",
+      "groupName": "target"
+    },
+    {
+      "name": "targetApplicationId",
+      "type": "pickList",
+      "label": "Application ID",
+      "required": false,
+      "helpMarkDown": "Select an existing application to use to find/create the target environment.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetApplicationName == ''",
+      "groupName": "target"
+    },
+    {
+      "name": "versionName",
+      "type": "string",
+      "label": "Version Name",
+      "required": true,
+      "helpMarkDown": "Deployed version",
+      "groupName": "version"
+    },
+    {
+      "name": "versionDescription",
+      "type": "multiline",
+      "label": "Description",
+      "required": false,
+      "helpMarkDown": "Description of the version.",
+      "properties": {
+        "resizable": "true",
+        "rows": "10",
+        "maxLength": "2000"
+      },
+      "groupName": "version"
+    },
+    {
+      "name": "versionStartDate",
+      "type": "string",
+      "label": "Start Date",
+      "required": false,
+      "helpMarkDown": "Version start date in ISO-8601 format. Ex: 2023-01-12T12:00:00Z",
+      "groupName": "version"
+    },
+    {
+      "name": "versionReleaseDate",
+      "type": "string",
+      "label": "Release Date",
+      "required": false,
+      "helpMarkDown": "Version release date in ISO-8601 format. Ex: 2023-09-24T12:00:00Z",
+      "groupName": "version"
+    },
+    {
+      "name": "versionReleased",
+      "type": "boolean",
+      "label": "Released",
+      "required": false,
+      "helpMarkDown": "Is the Version released",
+      "groupName": "version"
+    },
+    {
+      "name": "autoCreateVersion",
+      "type": "radio",
+      "label": "auto create (if not found)",
+      "required": false,
+      "helpMarkDown": "Try to create the Jira version with provided information if it does not exist yet in Jira instance.",
+      "groupName": "target",
+      "properties": {
+      },
+      "options": {
+        "yes": "yes",
+        "no": "no",
+        "default": "default"
+      }
+    },
+    {
+      "name": "scopeIssueKeys",
+      "type": "string",
+      "label": "Scope Jira Issue Keys",
+      "required": false,
+      "helpMarkDown": "Comma separated list of Jira Issue Keys included in the release. Ex: ECOM-3412,ECOM-6783,PAY-98",
+      "groupName": "scope"
+    },
+    {
+      "name": "scopeIssueKeysFromCommitHistory",
+      "type": "boolean",
+      "defaultValue": true,
+      "label": "Scope Issue Keys from Commit",
+      "required": false,
+      "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as part of scope.",
+      "groupName": "scope"
+    },
+    {
+      "name": "scopeJql",
+      "type": "string",
+      "label": "Scope Jira JQL",
+      "required": false,
+      "helpMarkDown": "JQL filter used to retrieve Jira Issue Keys included in the release. Ex: project = ECP AND type in (Story, Bug)",
+      "groupName": "scope"
+    },
+    {
+      "name": "sendNotification",
+      "type": "boolean",
+      "label": "Notify",
+      "required": false,
+      "helpMarkDown": "Should a notification sent for the issues updated with a fix version ?",
+      "groupName": "scope"
+    }
+  ],
+  "dataSourceBindings": [
+    {
+      "target": "targetApplicationId",
+      "endpointId": "$(serviceConnection)",
+      "dataSourceName": "applications",
+      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{id}}} - {{{name}}}\"}"
+    }
+  ],
+  "execution": {
+    "Node16": {
+      "target": "main.js",
+      "argumentFormat": ""
+    }
+  }
+}

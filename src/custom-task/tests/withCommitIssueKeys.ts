@@ -12,7 +12,7 @@ tmr.setInput('deploymentIssueKeysFromCommitHistory', 'true')
 
 tmr.registerMock('node-fetch', mockFetch())
 tmr.registerMock(
-  '../core/AzureClient',
+  './AzureClient',
   mockAzureClient({
     commits: [
       {

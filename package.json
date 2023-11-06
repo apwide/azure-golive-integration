@@ -15,12 +15,21 @@
     "do:create:task": "tfx build tasks create --task-id ${TASK_ID} --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} || true",
     "clean:task": "node scripts/golive.js clean:task",
     "do:clean:task": "tfx build tasks delete --task-id ${TASK_ID} --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} || true",
-    "publish:task": "tfx build tasks upload --task-path dist/custom-task --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
-    "clean:publish:task": "npm run clean:task && npm run publish:task",
     "package": "tfx extension create --root dist --manifests base.json --output-path dist/${BUILD_ENV}.vsix --publisher ${DEV_PUBLISHER}",
     "publish": "tfx extension publish --vsix dist/${BUILD_ENV}.vsix --token ${ADO_PAT}",
-    "dev": "npm run build && npm run package && npm run publish && npm run publish:task",
-    "dev:task": "npm run build && npm run publish:task"
+    "dev": "npm run build && npm run package && npm run publish && npm run publish:custom-task && npm run publish:release-info && npm run publish:deployment-info",
+
+    "publish:custom-task": "tfx build tasks upload --task-path dist/custom-task --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
+    "dev:custom-task": "npm run build && npm run publish:custom-task",
+    "clean:publish:custom-task": "npm run clean:task && npm run publish:custom-task",
+
+    "publish:release-info": "tfx build tasks upload --task-path dist/send-release-info --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
+    "dev:release-info": "npm run build && npm run publish:release-info",
+    "clean:publish:release-info": "npm run clean:task && npm run publish:release-info",
+
+    "publish:deployment-info": "tfx build tasks upload --task-path dist/send-deployment-info --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
+    "dev:deployment-info": "npm run build && npm run publish:deployment-info",
+    "clean:publish:deployment-info": "npm run clean:task && npm run publish:deployment-info"
   },
   "devDependencies": {
     "@types/mocha": "10.0.3",

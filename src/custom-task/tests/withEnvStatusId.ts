@@ -16,6 +16,6 @@ tmr.registerMock(
     updatedEnvironmentStatus: { status: { id: 23 } }
   })
 )
-tmr.registerMock('../core/AzureClient', mockAzureClient())
+tmr.registerMock('./AzureClient', mockAzureClient())
 
 tmr.run()
