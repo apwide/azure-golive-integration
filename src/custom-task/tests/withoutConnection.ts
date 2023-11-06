@@ -7,6 +7,6 @@ const tmr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath)
 
 tmr.setInput('targetEnvironmentId', '113')
 
-tmr.registerMock('../core/AzureClient', mockAzureClient())
+tmr.registerMock('./AzureClient', mockAzureClient())
 
 tmr.run()

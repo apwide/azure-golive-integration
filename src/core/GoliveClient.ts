@@ -12,6 +12,57 @@ function removeUndefined(payload: any): any {
   return payload
 }
 
+export type IssueScope = {
+  issueKeys?: string[]
+  jql?: string
+}
+
+export type DeploymentInformationRequest = {
+  environment: NamedReference
+  versionName?: string
+  description?: string
+  buildNumber?: string
+  deployedOn?: string
+  scope?: IssueScope
+  sendNotification?: boolean
+  autoCreateVersion?: boolean
+  attributes?: Record<string, string>
+}
+
+export type DeploymentInformationResponse = {
+  deploymentId: number
+  versionName?: string
+  versionId?: string
+  description?: string
+  buildNumber?: string
+  deployer: string
+  deployedOn: string
+  issueKeys?: string[]
+  attributes?: Record<string, string>
+}
+
+export type ReleaseInformationRequest = {
+  application: NamedReference
+  versionName: string
+  versionDescription?: string
+  startDate?: string
+  releaseDate?: string
+  released?: boolean
+  scope?: IssueScope
+  sendNotification?: boolean
+  autoCreateVersion?: boolean
+}
+
+export type ReleaseInformationResponse = {
+  versionId: number
+  versionName: string
+  versionDescription?: string
+  startDate: string
+  releaseDate?: string
+  released: boolean
+  fixedIssues?: string[]
+}
+
 export type DeploymentRequest = {
   versionName?: string
   buildNumber?: string
@@ -154,6 +205,20 @@ export class GoliveClient {
     return this.golive(`/deployment?environmentId=${environmentId}`, {
       method: 'PUT',
       body: JSON.stringify(removeUndefined(deployment))
+    })
+  }
+
+  async sendDeploymentInfo(info: DeploymentInformationRequest): Promise<DeploymentInformationResponse> {
+    return this.golive('/deployment-info', {
+      method: 'POST',
+      body: JSON.stringify(removeUndefined(info))
+    })
+  }
+
+  async sendReleaseInfo(info: ReleaseInformationRequest): Promise<ReleaseInformationResponse> {
+    return this.golive('/release-info', {
+      method: 'POST',
+      body: JSON.stringify(removeUndefined(info))
     })
   }
 }

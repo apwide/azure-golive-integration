@@ -3,13 +3,13 @@ const CopyPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
 const ReplaceInFileWebpackPlugin = require('replace-in-file-webpack-plugin')
 const { ComputeVersion } = require('./webpack.common.config')
-const Settings = require('./taskSettings')
+const { ExtensionSettings, TaskSettings } = require('./taskSettings')
 
 const Target = path.resolve("./dist")
 
 module.exports = env => {
   const buildEnv = process.env.BUILD_ENV
-  const validEnvs = Object.keys(Settings)
+  const validEnvs = Object.keys(ExtensionSettings)
   if (!validEnvs.includes(buildEnv)) {
     console.log(`BUILD_ENV set to ${buildEnv}`, buildEnv, env)
     console.error(`BUILD_ENV not set correctly. Allowed values are: ${validEnvs.join(', ')}`)
@@ -18,6 +18,14 @@ module.exports = env => {
 
   const { major, minor, patch, full } = ComputeVersion()
   console.log(`Version: ${full}`);
+
+  const entries = Object.keys(TaskSettings).reduce((previous, current) => {
+    previous[current] = {
+      import: `./src/${current}/main.ts`,
+      filename: `${current}/main.js`
+    }
+    return previous
+  }, {})
 
   return {
     target: 'node',
@@ -35,7 +43,10 @@ module.exports = env => {
     },
     resolve: {
       modules: ['node_modules'],
-      extensions: ['.ts', '.js']
+      extensions: ['.ts', '.js'],
+      alias: {
+        '@$': path.resolve(__dirname, 'src')
+      }
     },
     module: {
       rules: [
@@ -54,12 +65,7 @@ module.exports = env => {
         }
       ]
     },
-    entry: {
-      'custom-task': {
-        import: './src/custom-task/main.ts',
-        filename: 'custom-task/main.js'
-      }
-    },
+    entry: entries,
     // output: {
     //   filename: (pathData, assetInfo) => {
     //     console.log('[JULIEN] output filename', pathData, assetInfo)
@@ -102,11 +108,11 @@ module.exports = env => {
           rules: [
             {
               search: /{{tag}}/ig,
-              replace: Settings[buildEnv].Tag
+              replace: ExtensionSettings[buildEnv].Tag
             },
             {
               search: /{{galleryFlag}}/ig,
-              replace: Settings[buildEnv].GalleryFlag
+              replace: buildEnv === 'production' ? 'Public' : 'Private'
             },
             {
               search: /{{version}}/ig,
@@ -129,77 +135,79 @@ module.exports = env => {
       ]),
 
       // task
-      new CopyPlugin({
-        patterns: [
-          // These files are needed by azure-pipelines-task-lib library.
-          {
-            from: path.resolve('./node_modules/azure-pipelines-task-lib/lib.json'),
-            to: path.join(Target, 'custom-task')
-          },
-          {
-            from: path.resolve('./node_modules/azure-pipelines-task-lib/Strings'),
-            to: path.join(Target, 'custom-task')
-          },
+      ...Object.keys(TaskSettings).flatMap(task => [
+        new CopyPlugin({
+          patterns: [
+            // These files are needed by azure-pipelines-task-lib library.
+            {
+              from: path.resolve('./node_modules/azure-pipelines-task-lib/lib.json'),
+              to: path.join(Target, `${task}`)
+            },
+            {
+              from: path.resolve('./node_modules/azure-pipelines-task-lib/Strings'),
+              to: path.join(Target, `${task}`)
+            },
 
-          {
-            from: path.join(__dirname, './src/custom-task/task.json'),
-            to: path.join(Target, 'custom-task')
-          },
-          {
-            from: path.join(__dirname, './images/task.png'),
-            to: path.join(Target, 'custom-task', 'icon.png')
-          }
-        ]
-      }),
-      new ReplaceInFileWebpackPlugin([
-        {
-          dir: Target,
-          files: [
-            'custom-task/main.js'
-          ],
-          rules: [
-            // This replacement is required to allow azure-pipelines-task-lib to load the
-            // json resource file correctly
             {
-              search: /__webpack_require__\(.*\)\(resourceFile\)/,
-              replace: 'require(resourceFile)'
-            },
-          ]
-        }
-      ]),
-      new ReplaceInFileWebpackPlugin([
-        {
-          dir: Target,
-          files: [
-            'custom-task/task.json'
-          ],
-          rules: [
-            {
-              search: /{{taskid}}/ig,
-              replace: Settings[buildEnv].TaskGuid
+              from: path.join(__dirname, `./src/${task}/task.json`),
+              to: path.join(Target, `${task}`)
             },
             {
-              search: /{{tag}}/ig,
-              replace: Settings[buildEnv].Tag
-            },
-            {
-              search: /{{version}}/ig,
-              replace: full
-            },
-            {
-              search: /({{major}}|\"{{major}}\")/ig,
-              replace: major
-            },
-            {
-              search: /({{minor}}|\"{{minor}}\")/ig,
-              replace: minor
-            },
-            {
-              search: /({{patch}}|\"{{patch}}\")/ig,
-              replace: patch
+              from: path.join(__dirname, './images/task.png'),
+              to: path.join(Target, `${task}`, 'icon.png')
             }
           ]
-        }
+        }),
+        new ReplaceInFileWebpackPlugin([
+          {
+            dir: Target,
+            files: [
+              `${task}/main.js`
+            ],
+            rules: [
+              // This replacement is required to allow azure-pipelines-task-lib to load the
+              // json resource file correctly
+              {
+                search: /__webpack_require__\(.*\)\(resourceFile\)/,
+                replace: 'require(resourceFile)'
+              },
+            ]
+          }
+        ]),
+        new ReplaceInFileWebpackPlugin([
+          {
+            dir: Target,
+            files: [
+              `${task}/task.json`
+            ],
+            rules: [
+              {
+                search: /{{taskid}}/ig,
+                replace: TaskSettings[task][buildEnv].TaskGuid
+              },
+              {
+                search: /{{tag}}/ig,
+                replace: ExtensionSettings[buildEnv].Tag
+              },
+              {
+                search: /{{version}}/ig,
+                replace: full
+              },
+              {
+                search: /({{major}}|\"{{major}}\")/ig,
+                replace: major
+              },
+              {
+                search: /({{minor}}|\"{{minor}}\")/ig,
+                replace: minor
+              },
+              {
+                search: /({{patch}}|\"{{patch}}\")/ig,
+                replace: patch
+              }
+            ]
+          }
+        ])
       ])
     ]
   }

@@ -18,7 +18,7 @@ tmr.setInput('deploymentVersionName', 'ECOM 1.2.3.4')
 tmr.setInput('environmentStatusId', '23')
 tmr.setInput('environmentUrl', 'https://my-new-url.com')
 
-tmr.registerMock('../core/AzureClient', mockAzureClient())
+tmr.registerMock('./AzureClient', mockAzureClient())
 tmr.registerMock(
   'node-fetch',
   mockFetch({

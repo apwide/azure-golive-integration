@@ -15,6 +15,6 @@ tmr.registerMock(
     post: () => ({ environments: [] })
   })
 )
-tmr.registerMock('../core/AzureClient', mockAzureClient())
+tmr.registerMock('./AzureClient', mockAzureClient())
 
 tmr.run()

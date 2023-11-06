@@ -16,6 +16,6 @@ tmr.registerMock(
     updatedEnvironment: { id: 111, url: 'https://my-new-url.com' }
   })
 )
-tmr.registerMock('../core/AzureClient', mockAzureClient())
+tmr.registerMock('./AzureClient', mockAzureClient())
 
 tmr.run()

@@ -41,6 +41,19 @@ function mockFetch(
             if (url.includes('/environment')) {
               return data.createdEnvironment
             }
+            if (url.includes('/release-info')) {
+              console.log('Release-info sent:', options.body)
+              return {
+                versionName: 'FAKE',
+                fixedIssues: ['TEM-10']
+              }
+            }
+            if (url.includes('/deployment-info')) {
+              console.log('Deployment-info sent:', options.body)
+              return {
+                versionName: 'FAKE'
+              }
+            }
           } else if (options.method?.toLowerCase() === 'put') {
             console.log('Mock answer of this PUT:', options)
             if (data.put) {

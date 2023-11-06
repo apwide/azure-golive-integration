@@ -1,0 +1,180 @@
+{
+  "id": "{{taskid}}",
+  "name": "ApwideGoliveSendDeploymentInfos{{tag}}",
+  "friendlyName": "Apwide Golive Deployment Info{{tag}}",
+  "description": "Send deployment information to Apwide Golive for Jira",
+  "author": "apwide",
+  "helpMarkDown": "Learn more about Apwide Golive and Environment Tracking [here](https://www.apwide.com/documentation/cloud/track-environments)",
+  "category": "Build",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "demands": [],
+  "version": {
+    "Major": "{{major}}",
+    "Minor": "{{minor}}",
+    "Patch": "{{patch}}"
+  },
+  "minimumAgentVersion": "1.95.0",
+  "instanceNameFormat": "Service Endpoint Build Task $(project)",
+  "groups": [
+    {
+      "name": "target",
+      "displayName": "Target Environment",
+      "isExpanded": true
+    },
+    {
+      "name": "deployment",
+      "displayName": "Deployment",
+      "isExpanded": true
+    },
+    {
+      "name": "scope",
+      "displayName": "Scope",
+      "isExpanded": true
+    }
+  ],
+  "inputs": [
+    {
+      "name": "serviceConnection",
+      "type": "connectedService:golive",
+      "label": "Service Connection",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Apwide Golive for Jira connection to use. If needed, select 'Project settings', and create a new 'Service Connection' of type 'Apwide Golive for Jira'."
+    },
+    {
+      "name": "targetEnvironmentName",
+      "type": "string",
+      "label": "Environment Name",
+      "required": false,
+      "helpMarkDown": "Name of the environment in Apwide Golive",
+      "groupName": "target"
+    },
+    {
+      "name": "targetEnvironmentId",
+      "type": "pickList",
+      "label": "Environment ID",
+      "required": false,
+      "helpMarkDown": "Target environment the version is deployed to",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetEnvironmentName == ''",
+      "groupName": "target"
+    },
+    {
+      "name": "versionName",
+      "type": "string",
+      "label": "Version Name",
+      "required": true,
+      "helpMarkDown": "Deployed version",
+      "groupName": "deployment"
+    },
+    {
+      "name": "autoCreateVersion",
+      "type": "radio",
+      "label": "auto create (if not found)",
+      "required": false,
+      "helpMarkDown": "Try to create the Jira version with provided information if it does not exist yet in Jira instance.",
+      "groupName": "deployment",
+      "properties": {
+      },
+      "options": {
+        "yes": "yes",
+        "no": "no",
+        "default": "default"
+      }
+    },
+    {
+      "name": "description",
+      "type": "multiline",
+      "label": "Description",
+      "required": false,
+      "helpMarkDown": "Description of the deployment.",
+      "properties": {
+        "resizable": "true",
+        "rows": "10",
+        "maxLength": "2000"
+      },
+      "groupName": "deployment"
+    },
+    {
+      "name": "buildNumber",
+      "type": "string",
+      "label": "Build Number",
+      "required": false,
+      "helpMarkDown": "Build number. Ex: $(Build.BuildNumber)",
+      "groupName": "deployment"
+    },
+    {
+      "name": "attributes",
+      "type": "multiline",
+      "label": "Deployment Attributes",
+      "required": false,
+      "helpMarkDown": "Deployment attribute values in key-value JSON format. Ex:\n{\n  \"Requested By\" : \"me@company.com\",\n  \"Artefacts\" : \"https://binaries.company.com/download/232323\",\n  \"Repository\" : \"https://github.com/\"\n}",
+      "properties": {
+        "resizable": "true",
+        "rows": "10",
+        "maxLength": "2000"
+      },
+      "groupName": "deployment"
+    },
+    {
+      "name": "deployedOn",
+      "type": "string",
+      "label": "Deployment Date",
+      "required": false,
+      "helpMarkDown": "Date in ISO-8601 format. Ex: 2023-09-24T12:00:00Z",
+      "groupName": "deployment"
+    },
+    {
+      "name": "issueKeys",
+      "type": "string",
+      "label": "Jira Issue Keys",
+      "required": false,
+      "helpMarkDown": "Comma separated list of Jira Issue Keys that are deployed. Ex: ECOM-3412,ECOM-6783,PAY-98",
+      "groupName": "scope"
+    },
+    {
+      "name": "issueKeysFromCommit",
+      "type": "boolean",
+      "default": true,
+      "label": "Issue Keys from Commit",
+      "required": false,
+      "helpMarkDown": "Should parse commit messages to populate issue keys",
+      "groupName": "scope"
+    },
+    {
+      "name": "jql",
+      "type": "string",
+      "label": "Scope Jira JQL",
+      "required": false,
+      "helpMarkDown": "JQL filter used to retrieve Jira Issue Keys included in the release. Ex: project = ECP AND type in (Story, Bug)",
+      "groupName": "scope"
+    },
+    {
+      "name": "sendNotification",
+      "type": "boolean",
+      "label": "Notify",
+      "required": false,
+      "helpMarkDown": "Should a notification sent for the issues updated with a fix version ?",
+      "groupName": "scope"
+    }
+  ],
+  "dataSourceBindings": [
+    {
+      "target": "targetEnvironmentId",
+      "endpointId": "$(serviceConnection)",
+      "dataSourceName": "environments",
+      "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{id}}} - {{{name}}}\"}"
+    }
+  ],
+  "execution": {
+    "Node16": {
+      "target": "main.js",
+      "argumentFormat": ""
+    }
+  }
+}

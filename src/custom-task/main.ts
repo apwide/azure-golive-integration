@@ -1,7 +1,7 @@
 import tl = require('azure-pipelines-task-lib/task')
-import { GoliveClient } from '../core/GoliveClient'
-import { extractIssueKeys, log, parseAttributes, parseIssueKeys, unique } from '../core/utils'
-import { getAzureClient } from '../core/AzureClient'
+import { GoliveClient } from './../core/GoliveClient'
+import { log, parseAttributes, parseIssueKeys, unique } from './../core/utils'
+import { extractIssueKeysFromCommits } from './../core/scope'
 
 type GoliveInputs = {
   targetAutoCreate?: boolean
@@ -184,19 +184,7 @@ async function findIssueKeys(): Promise<string[]> {
     issueKeys = [...issueKeys, ...inputs.deploymentIssueKeys]
   }
   if (inputs.deploymentIssueKeysFromCommitHistory) {
-    log('Loading Issue keys from commits')
-    const azureClient = await getAzureClient()
-    const fromBuildId = parseInt(tl.getVariable('Build.BuildId'))
-    const lastSuccessfulBuild = await azureClient.getLastSuccessfulBuildDifferentThan(fromBuildId)
-
-    log(`Last successful build was ${lastSuccessfulBuild?.id}`)
-
-    const toCommitId = tl.getVariable('Build.SourceVersion')
-    const fromCommitId = lastSuccessfulBuild?.sourceVersion || toCommitId
-    const commits = await azureClient.getCommits(fromCommitId, toCommitId)
-    log(`${commits.length} commits found`)
-    const commitIssueKeys = commits.flatMap((commit) => extractIssueKeys(commit.comment))
-    issueKeys = [...issueKeys, ...commitIssueKeys]
+    issueKeys = [...issueKeys, ...(await extractIssueKeysFromCommits())]
   }
   return unique(issueKeys)
 }

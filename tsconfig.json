@@ -1,6 +1,7 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "esModuleInterop": false,
     "outDir": "build/",
     "noEmitOnError": true,
     "module": "commonjs",

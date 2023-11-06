@@ -179,7 +179,7 @@
     },
     {
       "id": "ApwideGoliveTrackEnvironment",
-      "description": "Task to push deployment information to Apwide Golive",
+      "description": "Task to push environment information to Apwide Golive",
       "type": "ms.vss-distributed-task.task",
       "targets": [
         "ms.vss-distributed-task.tasks"
@@ -187,11 +187,41 @@
       "properties": {
         "name": "custom-task"
       }
+    },
+    {
+      "id": "ApwideGoliveSendReleaseInfo",
+      "description": "Task to push release information to Apwide Golive",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "send-release-info"
+      }
+    },
+    {
+      "id": "ApwideGoliveSendDeploymentInfo",
+      "description": "Task to push deployment information to Apwide Golive",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "send-deployment-info"
+      }
     }
   ],
   "files": [
     {
       "path": "custom-task",
+      "addressable": true
+    },
+    {
+      "path": "send-release-info",
+      "addressable": true
+    },
+    {
+      "path": "send-deployment-info",
       "addressable": true
     },
     {
