@@ -161,12 +161,12 @@
       "groupName": "deployment"
     },
     {
-      "name": "deploymentIssueKeysFromCommit",
+      "name": "deploymentIssueKeysFromCommitHistory",
       "type": "boolean",
-      "default": true,
-      "label": "Issue Keys from Commit",
+      "defaultValue": true,
+      "label": "Jira Issue Keys from Commit History",
       "required": false,
-      "helpMarkDown": "Should parse commit messages to populate issue keys",
+      "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as deployed.",
       "groupName": "deployment"
     },
     {

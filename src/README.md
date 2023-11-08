@@ -63,9 +63,9 @@ In order, to use an existing environment as target, simply let the “Environmen
 ### Push deployment information
 If your pipeline is performing deployments, you can send the information of the performed deployment to Golive. All deployment information to push to Golive are set in the “Update Deployment” section:
 
-![AzureCustomTaskDeploymentInformation.png.png](images/AzureCustomTaskDeploymentInformation.png.png)
+![AzureCustomTaskDeploymentInformation.png](images/AzureCustomTaskDeploymentInformation.png)
 
-The "Issue Keys from Commit" option enables the parsing of commit messages to identify the issue keys that should be added to the deployment.
+The "Jira Issue Keys from Commit History" option enables the parsing of commit messages to identify the issue keys that should be added to the deployment.
 The task will go through all commits made from the current job to the last successful job.
 
 ### Update Environment Status
@@ -100,18 +100,20 @@ steps:
   targetCategoryName: 'Demo'
   deploymentVersionName: 'ECOM 2.3.4.34-SNAPSHOT'
   deploymentBuildNumber: '$(Build.BuildNumber)'
+  deploymentIssueKeys: 'ECOM-3454,ECOM-3489'
+  deploymentIssueKeysFromCommitHistory: true
   deploymentDescription: |
-  <b>✅ Job #$(Build.BuildId) - $(Build.DefinitionName)</b>
-  Requested by: $(Build.RequestedFor)
-  Branch: $(Build.SourceBranchName)
+      <b>✅ Job #$(Build.BuildId) - $(Build.DefinitionName)</b>
+      Requested by: $(Build.RequestedFor)
+      Branch: $(Build.SourceBranchName)
   environmentStatusId: '1'
   environmentUrl: 'https://ecommerce.staging.company.com'
   environmentAttributes: |
-  {
-  "OS" : "Linux",
-  "Location" : "Switzerland",
-  "Owner" : "me@company.com"
-  }
+      {
+      "OS" : "Linux",
+      "Location" : "Switzerland",
+      "Owner" : "me@company.com"
+      }
 ```
 
 ## Contact us

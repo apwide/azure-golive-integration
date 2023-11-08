@@ -9,7 +9,7 @@ const tmr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath)
 tmr.setInput('serviceConnection', 'ID1')
 tmr.setInput('targetEnvironmentId', '1')
 tmr.setInput('deploymentIssueKeys', 'TEM-900,TEM-902')
-tmr.setInput('deploymentIssueKeysFromCommit', 'true')
+tmr.setInput('deploymentIssueKeysFromCommitHistory', 'true')
 
 tmr.registerMock('node-fetch', mockFetch())
 tmr.registerMock(
