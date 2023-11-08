@@ -185,7 +185,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "custom-task"
+        "name": "environment-info"
       }
     },
     {
@@ -213,7 +213,7 @@
   ],
   "files": [
     {
-      "path": "custom-task",
+      "path": "environment-info",
       "addressable": true
     },
     {

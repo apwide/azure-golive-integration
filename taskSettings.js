@@ -9,7 +9,7 @@ const ExtensionSettings = {
 }
 
 const TaskSettings = {
-  'custom-task': {
+  'environment-info': {
     production: {
       TaskGuid: 'c5ed4c98-e170-4820-877d-cf58c5ee2fcd'
     },

@@ -138,12 +138,12 @@
       "groupName": "scope"
     },
     {
-      "name": "issueKeysFromCommit",
+      "name": "issueKeysFromCommitHistory",
       "type": "boolean",
-      "default": true,
+      "defaultValue": true,
       "label": "Issue Keys from Commit",
       "required": false,
-      "helpMarkDown": "Should parse commit messages to populate issue keys",
+      "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as deployed.",
       "groupName": "scope"
     },
     {
