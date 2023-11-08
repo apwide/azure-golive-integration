@@ -4,6 +4,11 @@ import { getHandlerFromToken, WebApi } from 'azure-devops-node-api'
 import { IBuildApi } from 'azure-devops-node-api/BuildApi'
 import { IGitApi } from 'azure-devops-node-api/GitApi'
 import { Build, BuildQueryOrder, BuildResult } from 'azure-devops-node-api/interfaces/BuildInterfaces'
+import { GitVersionDescriptor, GitVersionType } from 'azure-devops-node-api/interfaces/GitInterfaces'
+
+function isSuccessful(result: BuildResult): boolean {
+  return result === BuildResult.Succeeded || result === BuildResult.PartiallySucceeded
+}
 
 export class AzureClient {
   private readonly buildApi: IBuildApi
@@ -16,6 +21,15 @@ export class AzureClient {
     this.gitApi = gitApi
     this.projectId = projectId
     this.definitionId = definitionId
+  }
+
+  async getLastSuccessfulBuildDifferentThan(buildId: number): Promise<Build | null> {
+    const builds = await this.getBuilds()
+    // builds.forEach((build) => {
+    //   log(`build ${build.id}-${build.buildNumber} finished on ${build.finishTime} resulted in ${build.result}`)
+    // })
+
+    return builds.find(({ id, result }) => id !== buildId && isSuccessful(result)) || null
   }
 
   async getOldestFailedBuildDifferentThan(buildId: number): Promise<Build | null> {
@@ -71,7 +85,19 @@ export class AzureClient {
 
   async getCommits(fromCommitId: string, toCommitId: string) {
     const repositoryId = tl.getVariable('Build.Repository.Id')
-    return this.gitApi.getCommits(repositoryId, { fromCommitId, toCommitId })
+    if (fromCommitId === toCommitId) {
+      return this.gitApi.getCommits(repositoryId, { fromCommitId, toCommitId })
+    } else {
+      const itemVersion: GitVersionDescriptor = {
+        version: fromCommitId,
+        versionType: GitVersionType.Commit
+      }
+      const compareVersion: GitVersionDescriptor = {
+        version: toCommitId,
+        versionType: GitVersionType.Commit
+      }
+      return this.gitApi.getCommits(repositoryId, { itemVersion, compareVersion })
+    }
   }
 }
 

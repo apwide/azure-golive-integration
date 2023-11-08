@@ -21,7 +21,7 @@ type GoliveInputs = {
   deploymentBuildNumber?: string
   deploymentDescription?: string
   deploymentIssueKeys?: string[]
-  deploymentIssueKeysFromCommit: boolean
+  deploymentIssueKeysFromCommitHistory: boolean
   deploymentAttributes?: Record<string, string>
 }
 
@@ -42,7 +42,7 @@ function parseInput(): GoliveInputs {
     deploymentBuildNumber: tl.getInput('deploymentBuildNumber', false),
     deploymentDescription: tl.getInput('deploymentDescription', false),
     deploymentIssueKeys: parseIssueKeys(tl.getInput('deploymentIssueKeys', false)),
-    deploymentIssueKeysFromCommit: tl.getBoolInput('deploymentIssueKeysFromCommit', false),
+    deploymentIssueKeysFromCommitHistory: tl.getBoolInput('deploymentIssueKeysFromCommitHistory', false),
     deploymentAttributes: parseAttributes(tl.getInput('deploymentAttributes', false))
   }
 }
@@ -183,16 +183,16 @@ async function findIssueKeys(): Promise<string[]> {
     log('Loading Issue keys from input')
     issueKeys = [...issueKeys, ...inputs.deploymentIssueKeys]
   }
-  if (inputs.deploymentIssueKeysFromCommit) {
+  if (inputs.deploymentIssueKeysFromCommitHistory) {
     log('Loading Issue keys from commits')
     const azureClient = await getAzureClient()
     const fromBuildId = parseInt(tl.getVariable('Build.BuildId'))
-    const oldestFailedBuild = await azureClient.getOldestFailedBuildDifferentThan(fromBuildId)
+    const lastSuccessfulBuild = await azureClient.getLastSuccessfulBuildDifferentThan(fromBuildId)
 
-    log(`Previous oldest failed build was ${oldestFailedBuild?.id}`)
+    log(`Last successful build was ${lastSuccessfulBuild?.id}`)
 
-    const fromCommitId = tl.getVariable('Build.SourceVersion')
-    const toCommitId = oldestFailedBuild?.sourceVersion || fromCommitId
+    const toCommitId = tl.getVariable('Build.SourceVersion')
+    const fromCommitId = lastSuccessfulBuild?.sourceVersion || toCommitId
     const commits = await azureClient.getCommits(fromCommitId, toCommitId)
     log(`${commits.length} commits found`)
     const commitIssueKeys = commits.flatMap((commit) => extractIssueKeys(commit.comment))
