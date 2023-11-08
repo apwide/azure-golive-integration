@@ -14,7 +14,7 @@ type SendDeploymentInfoInputs = {
   attributes?: Record<string, string>
   deployedOn?: string
   issueKeys?: string[]
-  issueKeysFromCommit?: boolean
+  issueKeysFromCommitHistory?: boolean
   jql?: string
   sendNotification?: boolean
 }
@@ -31,6 +31,7 @@ function parseInputs(): SendDeploymentInfoInputs {
     attributes: parseAttributes(tl.getInput('attributes', false)),
     deployedOn: fixDate(tl.getInput('deployedOn', false)),
     issueKeys: parseIssueKeys(tl.getInput('issueKeys', false)),
+    issueKeysFromCommitHistory: !!tl.getInput('issueKeysFromCommitHistory', false),
     jql: tl.getInput('jql:', false),
     sendNotification: !!tl.getInput('sendNotification', false)
   }
@@ -50,7 +51,7 @@ async function findIssueKeys(): Promise<string[]> {
     log('Loading Issue keys from input')
     issueKeys = [...issueKeys, ...inputs.issueKeys]
   }
-  if (inputs.issueKeysFromCommit) {
+  if (inputs.issueKeysFromCommitHistory) {
     issueKeys = [...issueKeys, ...(await extractIssueKeysFromCommits())]
   }
   return unique(issueKeys)
