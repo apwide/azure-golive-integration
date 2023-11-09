@@ -2,37 +2,48 @@ import tl = require('azure-pipelines-task-lib/task')
 import { debug, fixDate, log, parseAttributes, parseDefaultBoolean, parseIssueKeys, unique } from '../core/utils'
 import { GoliveClient } from '../core/GoliveClient'
 import { extractIssueKeysFromCommits } from '../core/scope'
+import { getTargetEnvironmentId } from '../core/target'
 
 type SendDeploymentInfoInputs = {
   serviceConnection: string
+  targetAutoCreate: boolean
   targetEnvironmentId?: string
   targetEnvironmentName?: string
+  targetApplicationId?: string
+  targetApplicationName?: string
+  targetCategoryId?: string
+  targetCategoryName?: string
   versionName: string
   autoCreateVersion?: boolean
-  description?: string
-  buildNumber?: string
-  attributes?: Record<string, string>
-  deployedOn?: string
-  issueKeys?: string[]
-  issueKeysFromCommitHistory?: boolean
-  jql?: string
+  deploymentDescription?: string
+  deploymentBuildNumber?: string
+  deploymentAttributes?: Record<string, string>
+  deploymentDeployedOn?: string
+  deploymentIssueKeys?: string[]
+  deploymentIssueKeysFromCommitHistory?: boolean
+  deploymentJql?: string
   sendNotification?: boolean
 }
 
 function parseInputs(): SendDeploymentInfoInputs {
   const inputs: SendDeploymentInfoInputs = {
     serviceConnection: tl.getInput('serviceConnection', true),
+    targetAutoCreate: !!tl.getInput('targetAutoCreate', false),
     targetEnvironmentId: tl.getInput('targetEnvironmentId', false),
     targetEnvironmentName: tl.getInput('targetEnvironmentName', false),
+    targetCategoryName: tl.getInput('targetCategoryName', false),
+    targetCategoryId: tl.getInput('targetCategoryId', false),
+    targetApplicationId: tl.getInput('targetApplicationId', false),
+    targetApplicationName: tl.getInput('targetApplicationName', false),
     versionName: tl.getInput('versionName', true)!,
     autoCreateVersion: parseDefaultBoolean('autoCreateVersion', tl.getInput('autoCreateVersion', false)),
-    description: tl.getInput('description', false),
-    buildNumber: tl.getInput('buildNumber', false),
-    attributes: parseAttributes(tl.getInput('attributes', false)),
-    deployedOn: fixDate(tl.getInput('deployedOn', false)),
-    issueKeys: parseIssueKeys(tl.getInput('issueKeys', false)),
-    issueKeysFromCommitHistory: !!tl.getInput('issueKeysFromCommitHistory', false),
-    jql: tl.getInput('jql:', false),
+    deploymentDescription: tl.getInput('deploymentDescription', false),
+    deploymentBuildNumber: tl.getInput('deploymentBuildNumber', false),
+    deploymentAttributes: parseAttributes(tl.getInput('deploymentAttributes', false)),
+    deploymentDeployedOn: fixDate(tl.getInput('deploymentDeployedOn', false)),
+    deploymentIssueKeys: parseIssueKeys(tl.getInput('deploymentIssueKeys', false)),
+    deploymentIssueKeysFromCommitHistory: !!tl.getInput('deploymentIssueKeysFromCommitHistory', false),
+    deploymentJql: tl.getInput('deploymentJql', false),
     sendNotification: !!tl.getInput('sendNotification', false)
   }
 
@@ -47,11 +58,11 @@ function parseInputs(): SendDeploymentInfoInputs {
 
 async function findIssueKeys(): Promise<string[]> {
   let issueKeys = []
-  if (inputs.issueKeys) {
+  if (inputs.deploymentIssueKeys) {
     log('Loading Issue keys from input')
-    issueKeys = [...issueKeys, ...inputs.issueKeys]
+    issueKeys = [...issueKeys, ...inputs.deploymentIssueKeys]
   }
-  if (inputs.issueKeysFromCommitHistory) {
+  if (inputs.deploymentIssueKeysFromCommitHistory) {
     issueKeys = [...issueKeys, ...(await extractIssueKeysFromCommits())]
   }
   return unique(issueKeys)
@@ -65,22 +76,22 @@ async function run() {
     inputs = parseInputs()
     golive = new GoliveClient({ serviceConnection: inputs.serviceConnection })
 
+    const environmentId = await getTargetEnvironmentId(golive, inputs)
     const info = await golive.sendDeploymentInfo({
       environment: {
-        id: inputs.targetEnvironmentId,
-        name: inputs.targetEnvironmentName
+        id: environmentId
       },
       autoCreateVersion: inputs.autoCreateVersion,
       sendNotification: inputs.sendNotification,
-      deployedOn: inputs.deployedOn,
+      deployedOn: inputs.deploymentDeployedOn,
       scope: {
         issueKeys: await findIssueKeys(),
-        jql: inputs.jql
+        jql: inputs.deploymentJql
       },
       versionName: inputs.versionName,
-      buildNumber: inputs.buildNumber,
-      description: inputs.description,
-      attributes: inputs.attributes
+      buildNumber: inputs.deploymentBuildNumber,
+      description: inputs.deploymentDescription,
+      attributes: inputs.deploymentAttributes
     })
 
     log('Deployment information sent', info)

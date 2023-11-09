@@ -18,7 +18,7 @@ tmr.setInput('versionStartDate', '01/24/2023 12:10:00')
 // force to wrong format to mimic azure bug which convert date when returned by getInput
 tmr.setInput('versionReleaseDate', '11/02/2023 09:30:00')
 tmr.setInput('versionReleased', 'true')
-tmr.setInput('autoCreateVersion', 'yes')
+tmr.setInput('autoCreateVersion', 'true')
 tmr.setInput('scopeIssueKeys', 'TEM-10,TEM-100')
 tmr.setInput('scopeJql', `project = "ECP" and key in (ECP-288, ECP-287)`)
 tmr.setInput('sendNotification', 'true')
