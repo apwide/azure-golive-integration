@@ -2,6 +2,7 @@ import tl = require('azure-pipelines-task-lib/task')
 import { GoliveClient } from './../core/GoliveClient'
 import { log, parseAttributes, parseIssueKeys, unique } from './../core/utils'
 import { extractIssueKeysFromCommits } from './../core/scope'
+import { getTargetEnvironmentId } from '../core/target'
 
 type GoliveInputs = {
   targetAutoCreate?: boolean
@@ -9,6 +10,7 @@ type GoliveInputs = {
   targetEnvironmentId?: string
   targetEnvironmentName?: string
   targetCategoryName?: string
+  targetCategoryId?: string
   targetApplicationId?: string
   targetApplicationName?: string
   environmentStatusId?: string
@@ -32,6 +34,7 @@ function parseInput(): GoliveInputs {
     targetEnvironmentId: tl.getInput('targetEnvironmentId', false),
     targetEnvironmentName: tl.getInput('targetEnvironmentName', false),
     targetCategoryName: tl.getInput('targetCategoryName', false),
+    targetCategoryId: tl.getInput('targetCategoryId', false),
     targetApplicationId: tl.getInput('targetApplicationId', false),
     targetApplicationName: tl.getInput('targetApplicationName', false),
     environmentStatusId: tl.getInput('environmentStatusId', false),
@@ -44,86 +47,6 @@ function parseInput(): GoliveInputs {
     deploymentIssueKeys: parseIssueKeys(tl.getInput('deploymentIssueKeys', false)),
     deploymentIssueKeysFromCommitHistory: tl.getBoolInput('deploymentIssueKeysFromCommitHistory', false),
     deploymentAttributes: parseAttributes(tl.getInput('deploymentAttributes', false))
-  }
-}
-
-async function getTargetEnvironmentId(): Promise<string> {
-  if (inputs.targetEnvironmentId) {
-    return inputs.targetEnvironmentId
-  }
-
-  if (inputs.targetEnvironmentName) {
-    const environment = await golive.getEnvironmentByName(inputs.targetEnvironmentName)
-    log('Found environment', environment)
-    if (environment) {
-      return environment.id
-    }
-    if (inputs.targetAutoCreate) {
-      const applicationId = await getTargetApplicationId()
-      if (!applicationId) {
-        return
-      }
-      const categoryId = await getTargetCategoryId()
-      if (!categoryId) {
-        return
-      }
-      log(`Create environment with application ${applicationId}, category ${categoryId} and name ${inputs.targetEnvironmentName}`)
-      const environment = await golive.createEnvironment({
-        name: inputs.targetEnvironmentName,
-        application: {
-          id: applicationId
-        },
-        category: {
-          id: categoryId
-        }
-      })
-      log('Environment created response', environment)
-      return environment?.id
-    }
-  }
-}
-
-async function getTargetApplicationId(): Promise<string> {
-  if (inputs.targetApplicationId) {
-    return inputs.targetApplicationId
-  }
-
-  if (inputs.targetApplicationName) {
-    const application = await golive.getApplicationByName(inputs.targetApplicationName)
-    log('Found application', application)
-    if (application) {
-      return application.id
-    }
-    if (inputs.targetAutoCreate) {
-      log(`Create application with name ${inputs.targetApplicationName}`)
-      const application = await golive.createApplication({
-        name: inputs.targetApplicationName
-      })
-      log('Application created response', application)
-      return application.id
-    }
-  }
-}
-
-async function getTargetCategoryId(): Promise<string> {
-  if (inputs.targetEnvironmentId) {
-    return inputs.targetEnvironmentId
-  }
-
-  if (inputs.targetCategoryName) {
-    const category = await golive.getCategoryByName(inputs.targetCategoryName)
-    log('Found category', category)
-    if (category) {
-      return category.id
-    }
-    if (inputs.targetAutoCreate) {
-      log(`Create category with name ${inputs.targetCategoryName}`)
-      const category = await golive.createCategory({
-        name: inputs.targetCategoryName
-      })
-      log('Category created response', category)
-      return category.id
-    }
   }
 }
 
@@ -197,11 +120,7 @@ async function run() {
     inputs = parseInput()
     golive = new GoliveClient({ serviceConnection: inputs.serviceConnection })
 
-    const environmentId = await getTargetEnvironmentId()
-    if (!environmentId) {
-      throw new Error('Could not get a valid target environment')
-    }
-
+    const environmentId = await getTargetEnvironmentId(golive, inputs)
     await updateDeployment({ environmentId })
     await updateStatus({ environmentId })
     await updateEnvironment({ environmentId })

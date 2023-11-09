@@ -16,13 +16,13 @@ export function parseIssueKeys(issueKeys?: string): string[] | undefined {
 }
 
 export function parseDefaultBoolean(optionName: string, value?: string): boolean | undefined {
-  if (!value || value === 'default') {
+  if (!value || value.toLocaleLowerCase() === 'default') {
     return undefined
   }
-  if (value.toLocaleLowerCase() === 'yes') {
+  if (value.toLocaleLowerCase() === 'true') {
     return true
   }
-  if (value.toLocaleLowerCase() === 'no') {
+  if (value.toLocaleLowerCase() === 'false') {
     return false
   }
   throw new Error(`Unknown value ${value} for option ${optionName}`)

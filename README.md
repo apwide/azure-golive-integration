@@ -26,9 +26,9 @@ This repository contains source code, documentation and scripts required to buil
 ## Typical inner loop commands
 
 | What changed? | Which NPM command to run? | What it does? |
-| ------------- |:-------------:|:----- |
-| Task implementation | `npm run dev:task` | Build, package and update custom task without updating extension *(Faster)* |
-| Anything else | `npm run dev` | Build, package and publish full extension *(Slower)* |
+| ------------- |:-------------------------:|:----- |
+| Task implementation | `npm run dev:{task-name}` | Build, package and update custom task without updating extension *(Faster)* |
+| Anything else |       `npm run dev`       | Build, package and publish full extension *(Slower)* |
 
 ## Known bugs & limitations
 * you will not be able to publish the extension to the marketplace between 00:00 and 01:00 (AM)

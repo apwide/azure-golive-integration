@@ -116,7 +116,114 @@ steps:
       }
 ```
 
-## Contact us
+# Send Release Information Task
+
+Capture release information about your application and request Golive to push them to your Jira instance.
+
+This task will:
+* create/update Jira version with provided information
+* compute scope of the release with different available strategies (eg: static issue keys, JQL, commits parsing)
+* update fix version of issues selected as part of the scope.
+
+## Graphical assistant configuration
+
+![SendReleaseInfo.png](images/SendReleaseInfo.png)
+
+### Target Application
+Requires a "Service Connection" to contact Golive and the Golive application currently being released.
+Based Golive Application - Jira Project Mapping, Golive will be able to know to which project information
+must be sent.
+
+### Version
+Describe version information and if it should be created in case it does not exist.
+"auto create version" set to "golive config" will rely on Golive application configuration to decide
+if version must be created automatically. You can also override it and force the version creation if you
+set it to true.
+
+### Scope
+Choose which issues are part of the current release. Released version will be set as fix version of
+these issues.
+
+Scope can be provided from:
+* "Jira Issue Keys": static comma separated list of issue keys to include.
+* "Jira Issue Keys from Commit History": the task can parse commits messages between the current job and
+the last successful job to extract issue keys.
+* "Jira JQL": JQL executed on the Jira instance having Golive installed to.
+
+You can also choose to trigger a Jira notification to issue participants of issues having their fix version updated.
+
+## YAML configuration
+
+```yaml
+- task: ApwideGoliveSendReleaseInfosDev@1
+  inputs:
+    serviceConnection: 'apwide.atlassian.net'
+    targetApplicationId: '10'
+    versionName: 'ECOM 2.1.0.45-SNAPSHOT'
+    versionDescription: 'Enter description of your release here...'
+    versionStartDate: '2023-01-24T12:00:00Z'
+    versionReleaseDate: '2023-09-12T16:00:00Z'
+    versionReleased: true
+    autoCreateVersion: 'true'
+    scopeIssueKeys: 'ECOM-3454,ECOM-3489'
+    scopeIssueKeysFromCommitHistory: true
+    scopeJql: 'project = ECP and type in (Story)'
+    sendNotification: true
+```
+
+# Send Deployment Information Task
+
+Notify Golive about the detail of a deployment.
+
+This task will:
+* populate environment/application/category information if requested for and not available into Golive.
+* compute scope of the deployment the same manner it is done for a release.
+* push deployment information to Golive
+* synchronize version/issue information with Jira if requested to or if selected Golive application is configured to synchronize version.
+
+## Graphical assistance configuration
+
+![SendDeploymentInfo.png](images/SendDeploymentInfo.png)
+
+### Target Environment
+Configure the environment being deployed.
+
+When "auto-create" option is selected, depending on information provided to choose an environment such as application and/or category, data
+will be automatically created into Golive.
+
+### Deployment
+General information about current deployment.
+
+### Scope
+Select issues included in the current deployment.
+
+Scope is define the same way than for "Send Release Information" 
+
+## YAML configuration
+
+```yaml
+- task: ApwideGoliveSendDeploymentInfosDev@1
+  inputs:
+    serviceConnection: 'apwide.atlassian.net'
+    targetEnvironmentId: '11'
+    versionName: 'ECOM 2.1.0.45-SNAPSHOT'
+    autoCreateVersion: 'true'
+    deploymentBuildNumber: '${Build.BuildNumber}'
+    deploymentDescription: 'Enter description of your release here...'
+    deploymentAttributes: |
+      {
+        "Requested By" : "me@company.com",
+        "Artefacts" : "https://binaries.company.com/download/232323",
+        "Repository" : "https://github.com/"
+        }
+    deploymentDeployedOn: '2023-11-08T17:20:00Z'
+    deploymentIssueKeys: 'ECOM-3454,ECOM-3489'
+    deploymentIssueKeysFromCommitHistory: true
+    deploymentJql: 'project = ECP and type in (Story)'
+    sendNotification: true
+```
+
+# Contact us
 
 The full documentation of this extension is available here:
 * for Apwide Golive Cloud: https://golive.apwide.com/doc/latest/cloud/azure-devops-tfs-vsts

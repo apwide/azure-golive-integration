@@ -65,6 +65,60 @@
       "groupName": "target"
     },
     {
+      "name": "targetAutoCreate",
+      "type": "boolean",
+      "label": "auto create (if not found)",
+      "required": false,
+      "helpMarkDown": "Try to create the target environment with provided information if it does not exist yet in Apwide Golive.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetEnvironmentName != ''",
+      "groupName": "target"
+    },
+    {
+      "name": "targetApplicationName",
+      "type": "string",
+      "label": "Application Name",
+      "required": false,
+      "helpMarkDown": "Type the name of the application to select or create the target environment. \nA new Application will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage applications in order to automatically create new applications.",
+      "visibleRule": "targetAutoCreate == true",
+      "groupName": "target"
+    },
+    {
+      "name": "targetApplicationId",
+      "type": "pickList",
+      "label": "Application ID",
+      "required": false,
+      "helpMarkDown": "Select an existing application to use to find/create the target environment.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetAutoCreate == true && targetApplicationName == ''",
+      "groupName": "target"
+    },
+    {
+      "name": "targetCategoryName",
+      "type": "string",
+      "label": "Category Name",
+      "required": false,
+      "helpMarkDown": "Type the name of the category to find/create the target environment. \nA new Category will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage categories in order to automatically create new categories.",
+      "visibleRule": "targetAutoCreate == true",
+      "groupName": "target"
+    },
+    {
+      "name": "targetCategoryId",
+      "type": "pickList",
+      "label": "Category ID",
+      "required": false,
+      "helpMarkDown": "Select an existing category to use to find/create the target environment.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetAutoCreate == true && targetCategoryName == ''",
+      "groupName": "target"
+    },
+    {
       "name": "versionName",
       "type": "string",
       "label": "Version Name",
@@ -77,18 +131,27 @@
       "type": "radio",
       "label": "auto create (if not found)",
       "required": false,
-      "helpMarkDown": "Try to create the Jira version with provided information if it does not exist yet in Jira instance.",
+      "helpMarkDown": "Try to create the Jira version with provided information if it does not exist yet in Jira instance. If set to Golive config, will rely on Golive synchronization configuration to decide.",
       "groupName": "deployment",
+      "defaultValue": "default",
       "properties": {
       },
       "options": {
-        "yes": "yes",
-        "no": "no",
-        "default": "default"
+        "default": "golive config",
+        "true": "true",
+        "false": "false"
       }
     },
     {
-      "name": "description",
+      "name": "deploymentBuildNumber",
+      "type": "string",
+      "label": "Build Number",
+      "required": false,
+      "helpMarkDown": "Build number. Ex: $(Build.BuildNumber)",
+      "groupName": "deployment"
+    },
+    {
+      "name": "deploymentDescription",
       "type": "multiline",
       "label": "Description",
       "required": false,
@@ -101,15 +164,7 @@
       "groupName": "deployment"
     },
     {
-      "name": "buildNumber",
-      "type": "string",
-      "label": "Build Number",
-      "required": false,
-      "helpMarkDown": "Build number. Ex: $(Build.BuildNumber)",
-      "groupName": "deployment"
-    },
-    {
-      "name": "attributes",
+      "name": "deploymentAttributes",
       "type": "multiline",
       "label": "Deployment Attributes",
       "required": false,
@@ -122,7 +177,7 @@
       "groupName": "deployment"
     },
     {
-      "name": "deployedOn",
+      "name": "deploymentDeployedOn",
       "type": "string",
       "label": "Deployment Date",
       "required": false,
@@ -130,26 +185,26 @@
       "groupName": "deployment"
     },
     {
-      "name": "issueKeys",
+      "name": "deploymentIssueKeys",
       "type": "string",
       "label": "Jira Issue Keys",
       "required": false,
-      "helpMarkDown": "Comma separated list of Jira Issue Keys that are deployed. Ex: ECOM-3412,ECOM-6783,PAY-98",
+      "helpMarkDown": "Comma separated list of Jira Issue Keys that are included in the release. Ex: ECOM-3412,ECOM-6783,PAY-98",
       "groupName": "scope"
     },
     {
-      "name": "issueKeysFromCommitHistory",
+      "name": "deploymentIssueKeysFromCommitHistory",
       "type": "boolean",
-      "defaultValue": true,
-      "label": "Issue Keys from Commit",
+      "defaultValue": false,
+      "label": "Jira Issue Keys from Commit History",
       "required": false,
-      "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as deployed.",
+      "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as included in the release.",
       "groupName": "scope"
     },
     {
-      "name": "jql",
+      "name": "deploymentJql",
       "type": "string",
-      "label": "Scope Jira JQL",
+      "label": "Jira JQL",
       "required": false,
       "helpMarkDown": "JQL filter used to retrieve Jira Issue Keys included in the release. Ex: project = ECP AND type in (Story, Bug)",
       "groupName": "scope"
@@ -159,7 +214,7 @@
       "type": "boolean",
       "label": "Notify",
       "required": false,
-      "helpMarkDown": "Should a notification sent for the issues updated with a fix version ?",
+      "helpMarkDown": "Trigger a Jira notification for issues updated with a fix version.",
       "groupName": "scope"
     }
   ],

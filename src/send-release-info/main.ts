@@ -2,9 +2,11 @@ import tl = require('azure-pipelines-task-lib/task')
 import { debug, fixDate, log, parseDefaultBoolean, parseIssueKeys, unique } from '../core/utils'
 import { GoliveClient } from '../core/GoliveClient'
 import { extractIssueKeysFromCommits } from '../core/scope'
+import { getTargetApplicationId } from '../core/target'
 
 type ReleaseTaskInputs = {
   serviceConnection: string
+  targetAutoCreate?: boolean
   targetApplicationId?: string
   targetApplicationName?: string
   versionName: string
@@ -22,6 +24,7 @@ type ReleaseTaskInputs = {
 function parseInputs(): ReleaseTaskInputs {
   const inputs: ReleaseTaskInputs = {
     serviceConnection: tl.getInput('serviceConnection', true),
+    targetAutoCreate: !!tl.getInput('targetAutoCreate', false),
     targetApplicationId: tl.getInput('targetApplicationId', false),
     targetApplicationName: tl.getInput('targetApplicationName', false),
     versionName: tl.getInput('versionName', true),
@@ -65,10 +68,10 @@ async function run() {
     inputs = parseInputs()
     golive = new GoliveClient({ serviceConnection: inputs.serviceConnection })
 
+    const applicationId = await getTargetApplicationId(golive, inputs)
     const info = await golive.sendReleaseInfo({
       application: {
-        id: inputs.targetApplicationId,
-        name: inputs.targetApplicationName
+        id: applicationId
       },
       autoCreateVersion: inputs.autoCreateVersion,
       sendNotification: inputs.sendNotification,

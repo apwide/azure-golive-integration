@@ -65,6 +65,18 @@
       "groupName": "target"
     },
     {
+      "name": "targetAutoCreate",
+      "type": "boolean",
+      "label": "auto create (if not found)",
+      "required": false,
+      "helpMarkDown": "Try to create the target application with provided information if it does not exist yet in Apwide Golive.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetApplicationName != ''",
+      "groupName": "target"
+    },
+    {
       "name": "versionName",
       "type": "string",
       "label": "Version Name",
@@ -90,7 +102,7 @@
       "type": "string",
       "label": "Start Date",
       "required": false,
-      "helpMarkDown": "Version start date in ISO-8601 format. Ex: 2023-01-12T12:00:00Z",
+      "helpMarkDown": "Date in ISO-8601 format. Ex: 2023-09-24T12:00:00Z",
       "groupName": "version"
     },
     {
@@ -98,7 +110,7 @@
       "type": "string",
       "label": "Release Date",
       "required": false,
-      "helpMarkDown": "Version release date in ISO-8601 format. Ex: 2023-09-24T12:00:00Z",
+      "helpMarkDown": "Date in ISO-8601 format. Ex: 2023-09-24T12:00:00Z",
       "groupName": "version"
     },
     {
@@ -112,22 +124,23 @@
     {
       "name": "autoCreateVersion",
       "type": "radio",
-      "label": "auto create (if not found)",
+      "label": "auto create version (if not found)",
       "required": false,
-      "helpMarkDown": "Try to create the Jira version with provided information if it does not exist yet in Jira instance.",
-      "groupName": "target",
+      "helpMarkDown": "Try to create the Jira version with provided information if it does not exist yet in Jira instance. If set to Golive config, will rely on Golive synchronization configuration to decide.",
+      "groupName": "version",
+      "defaultValue": "default",
       "properties": {
       },
       "options": {
-        "yes": "yes",
-        "no": "no",
-        "default": "default"
+        "default": "golive config",
+        "true": "true",
+        "false": "false"
       }
     },
     {
       "name": "scopeIssueKeys",
       "type": "string",
-      "label": "Scope Jira Issue Keys",
+      "label": "Jira Issue Keys",
       "required": false,
       "helpMarkDown": "Comma separated list of Jira Issue Keys included in the release. Ex: ECOM-3412,ECOM-6783,PAY-98",
       "groupName": "scope"
@@ -135,8 +148,8 @@
     {
       "name": "scopeIssueKeysFromCommitHistory",
       "type": "boolean",
-      "defaultValue": true,
-      "label": "Scope Issue Keys from Commit",
+      "defaultValue": false,
+      "label": "Jira Issue Keys from Commit History",
       "required": false,
       "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as part of scope.",
       "groupName": "scope"
@@ -144,7 +157,7 @@
     {
       "name": "scopeJql",
       "type": "string",
-      "label": "Scope Jira JQL",
+      "label": "Jira JQL",
       "required": false,
       "helpMarkDown": "JQL filter used to retrieve Jira Issue Keys included in the release. Ex: project = ECP AND type in (Story, Bug)",
       "groupName": "scope"
@@ -154,7 +167,7 @@
       "type": "boolean",
       "label": "Notify",
       "required": false,
-      "helpMarkDown": "Should a notification sent for the issues updated with a fix version ?",
+      "helpMarkDown": "Trigger a Jira notification for issues updated with a fix version.",
       "groupName": "scope"
     }
   ],
