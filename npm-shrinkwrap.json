@@ -1,12 +1,12 @@
 {
   "name": "azure-pipelines-custom-task",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "lockfileVersion": 2,
   "requires": true,
   "packages": {
     "": {
       "name": "azure-pipelines-custom-task",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "azure-devops-node-api": "12.1.0",
         "azure-pipelines-task-lib": "4.6.1",
