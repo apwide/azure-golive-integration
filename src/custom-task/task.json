@@ -163,7 +163,7 @@
     {
       "name": "deploymentIssueKeysFromCommitHistory",
       "type": "boolean",
-      "defaultValue": true,
+      "defaultValue": false,
       "label": "Jira Issue Keys from Commit History",
       "required": false,
       "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as deployed.",
