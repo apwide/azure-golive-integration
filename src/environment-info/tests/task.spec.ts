@@ -41,7 +41,7 @@ describe('Send Environment Infos Test Suite', () => {
       assertInConsole(
         tr,
         // eslint-disable-next-line max-len
-        'Call triggered to POST testBaseURL/environment/info: {"target":{"environment":{"name":"new app new cat"},"application":{"name":"app"},"category":{"name":"cat"},"autoCreate":true},"environment":{"url":"https://my-new-url.com"},"status":{"id":"23"},"deployment":{"versionName":"ECOM 1.2.3.4","issues":{"noFixVersionUpdate":false,"addDoneIssuesFixedInVersion":false,"sendJiraNotification":false}}}'
+        'Call triggered to POST testBaseURL/environment/information: {"environmentSelector":{"environment":{"name":"new app new cat","autoCreate":true},"application":{"name":"app","autoCreate":true},"category":{"name":"cat","autoCreate":true}},"environment":{"url":"https://my-new-url.com"},"status":{"id":"23"},"deployment":{"versionName":"ECOM 1.2.3.4","issues":{"noFixVersionUpdate":false,"addDoneIssuesFixedInVersion":false,"sendJiraNotification":false}}}'
       )
     })
   })
@@ -59,7 +59,7 @@ describe('Send Environment Infos Test Suite', () => {
       assert.equal(tr.succeeded, true)
       assertNotInConsole(tr, 'Loading Issue keys from commits')
       assertInConsole(tr, 'Found issue keys []')
-      const sent: EnvironmentInformationRequest = getBodySentTo(tr.stdout, '/environment/info', 'POST')
+      const sent: EnvironmentInformationRequest = getBodySentTo(tr.stdout, '/environment/information', 'POST')
       assert.equal(sent.deployment.issues?.issueKeys, undefined)
     })
   })

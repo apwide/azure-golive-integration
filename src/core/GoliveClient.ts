@@ -1,11 +1,8 @@
 import tl = require('azure-pipelines-task-lib/task')
-import { debug, log } from './utils'
+import { debug, toBase64 } from './utils'
 import fetch from 'node-fetch'
 import * as https from 'https'
-
-function toBase64(value: string) {
-  return Buffer.from(value).toString('base64')
-}
+import { tokenHeaders } from './restUtils'
 
 function removeUndefined(payload: any): any {
   Object.keys(payload).forEach((key) => {
@@ -40,11 +37,10 @@ export type DeploymentInfo = {
 }
 
 export type EnvironmentInformationRequest = {
-  target: {
-    environment: NamedReference
-    application?: NamedReference
-    category?: NamedReference
-    autoCreate?: boolean
+  environmentSelector: {
+    environment: CreatableNamedReference
+    application?: CreatableNamedReference
+    category?: CreatableNamedReference
   }
   environment?: EnvironmentInfo
   deployment?: DeploymentInfo
@@ -127,6 +123,12 @@ export type NamedReference = {
   name?: string
 }
 
+export type CreatableNamedReference = {
+  id?: string
+  name?: string
+  autoCreate?: boolean
+}
+
 export class GoliveClient {
   private readonly golive: any
 
@@ -141,6 +143,8 @@ export class GoliveClient {
     const headers: Record<string, string> = {
       'content-type': 'application/json',
       'accept': 'application/json',
+      'user-agent': 'apwide-golive-azure (v1)',
+      ...tokenHeaders(apiToken),
       'Authorization': authenticationScheme === 'Token' ? 'Bearer ' + apiToken : 'Basic ' + toBase64(`${username}:${password}`)
     }
 
@@ -252,7 +256,7 @@ export class GoliveClient {
   }
 
   async sendEnvironmentInfo(info: EnvironmentInformationRequest): Promise<EnvironmentInformationResponse> {
-    return this.golive('/environment/info', {
+    return this.golive('/environment/information', {
       method: 'POST',
       body: JSON.stringify(removeUndefined(info))
     })
