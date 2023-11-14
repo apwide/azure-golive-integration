@@ -141,20 +141,22 @@ async function run() {
     }
 
     await golive.sendEnvironmentInfo({
-      target: {
+      environmentSelector: {
         environment: {
           id: inputs.targetEnvironmentId,
-          name: inputs.targetEnvironmentName
+          name: inputs.targetEnvironmentName,
+          autoCreate: inputs.targetAutoCreate
         },
         application: {
           id: inputs.targetApplicationId,
-          name: inputs.targetApplicationName
+          name: inputs.targetApplicationName,
+          autoCreate: inputs.targetAutoCreate
         },
         category: {
           id: inputs.targetCategoryId,
-          name: inputs.targetCategoryName
-        },
-        autoCreate: inputs.targetAutoCreate
+          name: inputs.targetCategoryName,
+          autoCreate: inputs.targetAutoCreate
+        }
       },
       environment,
       status,
