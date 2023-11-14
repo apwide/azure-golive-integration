@@ -24,14 +24,6 @@ const TaskSettings = {
     development: {
       TaskGuid: 'b8fb09a7-d958-46b2-baac-3d1dbc1a1faa'
     }
-  },
-  'send-deployment-info': {
-    production: {
-      TaskGuid: '6ecd2901-9b64-446f-8f14-36f190be8318'
-    },
-    development: {
-      TaskGuid: '0e43074d-be58-420a-b1d9-e162ad6ccc91'
-    }
   }
 }
 

@@ -27,4 +27,19 @@ function assertNotInConsole(tr: ttm.MockTestRunner, text) {
   assert.ok(!tr.stdout.includes(text), `found in console but should not: ${text}`)
 }
 
-export { runTest, assertInConsole, assertNotInConsole, assertContains }
+function mockServiceConnection() {
+  process.env.ENDPOINT_URL_ID1 = 'testBaseURL/'
+  process.env.ENDPOINT_AUTH_ID1 = '{"scheme":"apitoken", "parameters": {"apitoken": "mytoken123"}}'
+  process.env.ENDPOINT_AUTH_PARAMETER_ID1_APITOKEN = 'mytoken123'
+  process.env.ENDPOINT_AUTH_PARAMETER_ID1_SCHEME = 'apitoken'
+}
+
+function getBodySentTo(stdout: string, url: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET') {
+  const result = new RegExp(`(Call triggered to ${method} testBaseURL${url}:\\s*)(.*)\\n`).exec(stdout)
+  if (result.length > 1) {
+    return JSON.parse(result[2])
+  }
+  return undefined
+}
+
+export { runTest, assertInConsole, assertNotInConsole, assertContains, mockServiceConnection, getBodySentTo }

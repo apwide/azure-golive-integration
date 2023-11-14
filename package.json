@@ -17,16 +17,13 @@
     "do:clean:task": "tfx build tasks delete --task-id ${TASK_ID} --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} || true",
     "package": "tfx extension create --root dist --manifests base.json --output-path dist/${BUILD_ENV}.vsix --publisher ${DEV_PUBLISHER}",
     "publish": "tfx extension publish --vsix dist/${BUILD_ENV}.vsix --token ${ADO_PAT}",
-    "dev": "npm run build && npm run package && npm run publish && npm run publish:environment-info && npm run publish:release-info && npm run publish:deployment-info",
+    "dev": "npm run build && npm run package && npm run publish && npm run publish:environment-info && npm run publish:release-info",
     "publish:environment-info": "tfx build tasks upload --task-path dist/environment-info --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
     "dev:environment-info": "npm run build && npm run publish:environment-info",
     "clean:publish:environment-info": "npm run clean:task && npm run publish:environment-info",
     "publish:release-info": "tfx build tasks upload --task-path dist/send-release-info --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
     "dev:release-info": "npm run build && npm run publish:release-info",
-    "clean:publish:release-info": "npm run clean:task && npm run publish:release-info",
-    "publish:deployment-info": "tfx build tasks upload --task-path dist/send-deployment-info --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
-    "dev:deployment-info": "npm run build && npm run publish:deployment-info",
-    "clean:publish:deployment-info": "npm run clean:task && npm run publish:deployment-info"
+    "clean:publish:release-info": "npm run clean:task && npm run publish:release-info"
   },
   "devDependencies": {
     "@types/mocha": "10.0.4",

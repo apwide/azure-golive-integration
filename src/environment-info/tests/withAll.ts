@@ -19,28 +19,6 @@ tmr.setInput('environmentStatusId', '23')
 tmr.setInput('environmentUrl', 'https://my-new-url.com')
 
 tmr.registerMock('./AzureClient', mockAzureClient())
-tmr.registerMock(
-  'node-fetch',
-  mockFetch({
-    foundEnvironments: [],
-    foundApplications: [],
-    foundCategories: [],
-    createdApplication: { name: 'app', id: '12' },
-    createdCategory: { name: 'cat', id: '13' },
-    createdEnvironment: {
-      id: 333,
-      name: 'new app new cat',
-      application: {
-        id: 12
-      },
-      category: {
-        id: 13
-      }
-    },
-    updatedDeployment: { message: 'Deployed version updated to ECOM 1.2.3.4' },
-    updatedEnvironmentStatus: { status: { id: 23 } },
-    updatedEnvironment: { id: 333, url: 'https://my-new-url.com' }
-  })
-)
+tmr.registerMock('node-fetch', mockFetch())
 
 tmr.run()

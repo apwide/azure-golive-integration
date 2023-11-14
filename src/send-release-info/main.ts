@@ -14,11 +14,11 @@ type ReleaseTaskInputs = {
   versionStartDate?: string
   versionReleaseDate?: string
   versionReleased?: boolean
-  autoCreateVersion?: boolean
-  scopeIssueKeys?: string[]
-  scopeIssueKeysFromCommitHistory?: boolean
-  scopeJql?: string
-  sendNotification?: boolean
+  issuesIssueKeys?: string[]
+  issuesIssueKeysFromCommitHistory?: boolean
+  issuesJql?: string
+  issuesSendJiraNotification?: boolean
+  issuesNoFixVersionUpdate?: boolean
 }
 
 function parseInputs(): ReleaseTaskInputs {
@@ -31,12 +31,12 @@ function parseInputs(): ReleaseTaskInputs {
     versionDescription: tl.getInput('versionDescription', false),
     versionStartDate: fixDate(tl.getInput('versionStartDate', false)),
     versionReleaseDate: fixDate(tl.getInput('versionReleaseDate', false)),
-    versionReleased: !!tl.getInput('versionReleased', false),
-    autoCreateVersion: parseDefaultBoolean('autoCreateVersion', tl.getInput('autoCreateVersion', false)),
-    scopeIssueKeys: parseIssueKeys(tl.getInput('scopeIssueKeys', false)),
-    scopeIssueKeysFromCommitHistory: !!tl.getInput('scopeIssueKeysFromCommitHistory', false),
-    scopeJql: tl.getInput('scopeJql', false),
-    sendNotification: !!tl.getInput('sendNotification', false)
+    versionReleased: tl.getBoolInput('versionReleased', false),
+    issuesIssueKeys: parseIssueKeys(tl.getInput('issuesIssueKeys', false)),
+    issuesIssueKeysFromCommitHistory: tl.getBoolInput('issuesIssueKeysFromCommitHistory', false),
+    issuesJql: tl.getInput('issuesJql', false),
+    issuesSendJiraNotification: tl.getBoolInput('issuesSendJiraNotification', false),
+    issuesNoFixVersionUpdate: tl.getBoolInput('issuesNoFixVersionUpdate', false)
   }
 
   if (!inputs.targetApplicationId && !inputs.targetApplicationName) {
@@ -53,14 +53,16 @@ let golive: GoliveClient
 
 async function findIssueKeys(): Promise<string[]> {
   let issueKeys = []
-  if (inputs.scopeIssueKeys) {
+  if (inputs.issuesIssueKeys) {
     log('Loading Issue keys from input')
-    issueKeys = [...issueKeys, ...inputs.scopeIssueKeys]
+    issueKeys = [...issueKeys, ...inputs.issuesIssueKeys]
   }
-  if (inputs.scopeIssueKeysFromCommitHistory) {
+  if (inputs.issuesIssueKeysFromCommitHistory) {
     issueKeys = [...issueKeys, ...(await extractIssueKeysFromCommits())]
   }
-  return unique(issueKeys)
+  const found = unique(issueKeys)
+  log('Found issue keys', found)
+  return found
 }
 
 async function run() {
@@ -73,16 +75,16 @@ async function run() {
       application: {
         id: applicationId
       },
-      autoCreateVersion: inputs.autoCreateVersion,
-      sendNotification: inputs.sendNotification,
       versionDescription: inputs.versionDescription,
       versionName: inputs.versionName,
       startDate: inputs.versionStartDate,
       releaseDate: inputs.versionReleaseDate,
       released: inputs.versionReleased,
-      scope: {
+      issues: {
         issueKeys: await findIssueKeys(),
-        jql: inputs.scopeJql
+        jql: inputs.issuesJql,
+        noFixVersionUpdate: inputs.issuesNoFixVersionUpdate,
+        sendJiraNotification: inputs.issuesSendJiraNotification
       }
     })
 

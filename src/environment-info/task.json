@@ -140,6 +140,14 @@
       "groupName": "deployment"
     },
     {
+      "name": "deploymentDeployedDate",
+      "type": "string",
+      "label": "Deployed Date",
+      "required": false,
+      "helpMarkDown": "Date in ISO-8601 format. Ex: 2023-09-24T12:00:00Z",
+      "groupName": "deployment"
+    },
+    {
       "name": "deploymentDescription",
       "type": "multiline",
       "label": "Description",
@@ -150,6 +158,14 @@
         "rows": "10",
         "maxLength": "2000"
       },
+      "groupName": "deployment"
+    },
+    {
+      "name": "deploymentAddDoneIssuesFixedInVersion",
+      "type": "boolean",
+      "label": "Link Done Issues",
+      "required": false,
+      "helpMarkDown": "Include issues in a \"Done\" state to the deployment.",
       "groupName": "deployment"
     },
     {
@@ -170,6 +186,14 @@
       "groupName": "deployment"
     },
     {
+      "name": "deploymentJql",
+      "type": "string",
+      "label": "Jira JQL",
+      "required": false,
+      "helpMarkDown": "JQL filter used to retrieve Jira Issue Keys included in the deployment. Ex: project = ECP AND type in (Story, Bug)",
+      "groupName": "deployment"
+    },
+    {
       "name": "deploymentAttributes",
       "type": "multiline",
       "label": "Deployment Attributes",
@@ -180,6 +204,23 @@
         "rows": "10",
         "maxLength": "2000"
       },
+      "groupName": "deployment"
+    },
+    {
+      "name": "deploymentNoFixVersionUpdate",
+      "type": "boolean",
+      "label": "Prevent Fix Version Update",
+      "required": false,
+      "helpMarkDown": "Prevent updating deployment issues fix version field.",
+      "groupName": "deployment"
+    },
+    {
+      "name": "deploymentSendJiraNotification",
+      "type": "boolean",
+      "label": "Notify",
+      "required": false,
+      "helpMarkDown": "Trigger a Jira notification for issues updated with a fix version.",
+      "visibleRule": "deploymentNoFixVersionUpdate != true",
       "groupName": "deployment"
     },
     {

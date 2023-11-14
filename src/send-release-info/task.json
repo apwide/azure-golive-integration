@@ -30,8 +30,8 @@
       "isExpanded": true
     },
     {
-      "name": "scope",
-      "displayName": "Scope",
+      "name": "issues",
+      "displayName": "Issues",
       "isExpanded": true
     }
   ],
@@ -62,18 +62,6 @@
         "EditableOptions": "True"
       },
       "visibleRule": "targetApplicationName == ''",
-      "groupName": "target"
-    },
-    {
-      "name": "targetAutoCreate",
-      "type": "boolean",
-      "label": "auto create (if not found)",
-      "required": false,
-      "helpMarkDown": "Try to create the target application with provided information if it does not exist yet in Apwide Golive.",
-      "properties": {
-        "EditableOptions": "True"
-      },
-      "visibleRule": "targetApplicationName != ''",
       "groupName": "target"
     },
     {
@@ -122,53 +110,49 @@
       "groupName": "version"
     },
     {
-      "name": "autoCreateVersion",
-      "type": "radio",
-      "label": "auto create version (if not found)",
+      "name": "issuesNoFixVersionUpdate",
+      "type": "boolean",
+      "label": "Prevent Fix Version Update",
       "required": false,
-      "helpMarkDown": "Try to create the Jira version with provided information if it does not exist yet in Jira instance. If set to Golive config, will rely on Golive synchronization configuration to decide.",
-      "groupName": "version",
-      "defaultValue": "default",
-      "properties": {
-      },
-      "options": {
-        "default": "golive config",
-        "true": "true",
-        "false": "false"
-      }
+      "helpMarkDown": "Prevent updating release issues fix version field.",
+      "groupName": "issues"
     },
     {
-      "name": "scopeIssueKeys",
+      "name": "issuesIssueKeys",
       "type": "string",
       "label": "Jira Issue Keys",
       "required": false,
       "helpMarkDown": "Comma separated list of Jira Issue Keys included in the release. Ex: ECOM-3412,ECOM-6783,PAY-98",
-      "groupName": "scope"
+      "visibleRule": "issuesNoFixVersionUpdate != true",
+      "groupName": "issues"
     },
     {
-      "name": "scopeIssueKeysFromCommitHistory",
+      "name": "issuesIssueKeysFromCommitHistory",
       "type": "boolean",
       "defaultValue": false,
       "label": "Jira Issue Keys from Commit History",
       "required": false,
       "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as part of scope.",
-      "groupName": "scope"
+      "visibleRule": "issuesNoFixVersionUpdate != true",
+      "groupName": "issues"
     },
     {
-      "name": "scopeJql",
+      "name": "issuesJql",
       "type": "string",
       "label": "Jira JQL",
       "required": false,
       "helpMarkDown": "JQL filter used to retrieve Jira Issue Keys included in the release. Ex: project = ECP AND type in (Story, Bug)",
-      "groupName": "scope"
+      "visibleRule": "issuesNoFixVersionUpdate != true",
+      "groupName": "issues"
     },
     {
-      "name": "sendNotification",
+      "name": "issuesSendJiraNotification",
       "type": "boolean",
       "label": "Notify",
       "required": false,
       "helpMarkDown": "Trigger a Jira notification for issues updated with a fix version.",
-      "groupName": "scope"
+      "visibleRule": "issuesNoFixVersionUpdate != true",
+      "groupName": "issues"
     }
   ],
   "dataSourceBindings": [

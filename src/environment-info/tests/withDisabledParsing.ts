@@ -8,7 +8,7 @@ const tmr: tmrm.TaskMockRunner = new tmrm.TaskMockRunner(taskPath)
 
 tmr.setInput('serviceConnection', 'ID1')
 tmr.setInput('targetEnvironmentId', '1')
-tmr.setInput('deploymentIssueKeysFromCommitHistory', 'false')
+tmr.setInput('deploymentVersionName', 'ECOM-2.1')
 
 tmr.registerMock('node-fetch', mockFetch())
 tmr.registerMock(
