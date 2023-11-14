@@ -8,37 +8,73 @@ function toBase64(value: string) {
 }
 
 function removeUndefined(payload: any): any {
-  Object.keys(payload).forEach((key) => payload[key] === undefined && delete payload[key])
+  Object.keys(payload).forEach((key) => {
+    payload[key] === undefined && delete payload[key]
+    if (typeof payload[key] === 'object') {
+      removeUndefined(payload[key])
+    }
+  })
   return payload
 }
 
-export type IssueScope = {
+export type DeployedIssues = {
   issueKeys?: string[]
   jql?: string
+  sendJiraNotification?: boolean
+  noFixVersionUpdate?: boolean
+  addDoneIssuesFixedInVersion?: boolean
 }
 
-export type DeploymentInformationRequest = {
-  environment: NamedReference
-  versionName?: string
-  description?: string
-  buildNumber?: string
-  deployedOn?: string
-  scope?: IssueScope
-  sendNotification?: boolean
-  autoCreateVersion?: boolean
+export type EnvironmentInfo = {
+  url?: string
   attributes?: Record<string, string>
 }
 
-export type DeploymentInformationResponse = {
-  deploymentId: number
+export type DeploymentInfo = {
+  versionName?: string
+  description?: string
+  buildNumber?: string
+  deployedDate?: string
+  attributes?: Record<string, string>
+  issues?: DeployedIssues
+}
+
+export type EnvironmentInformationRequest = {
+  target: {
+    environment: NamedReference
+    application?: NamedReference
+    category?: NamedReference
+    autoCreate?: boolean
+  }
+  environment?: EnvironmentInfo
+  deployment?: DeploymentInfo
+  status?: NamedReference
+}
+
+export type EnvironmentInformationResponse = {
+  environment: NamedReference
+  deployment?: DeploymentInfoDetail
+  status?: NamedReference
+}
+
+export type DeploymentInfoDetail = {
+  id: number
+  environmentId: number
   versionName?: string
   versionId?: string
   description?: string
   buildNumber?: string
   deployer: string
   deployedOn: string
-  issueKeys?: string[]
+  issueKeys?: string[] // TODO should be removed
   attributes?: Record<string, string>
+}
+
+export type ReleasedIssues = {
+  issueKeys?: string[]
+  jql?: string
+  sendJiraNotification?: boolean
+  noFixVersionUpdate?: boolean
 }
 
 export type ReleaseInformationRequest = {
@@ -48,9 +84,9 @@ export type ReleaseInformationRequest = {
   startDate?: string
   releaseDate?: string
   released?: boolean
-  scope?: IssueScope
-  sendNotification?: boolean
-  autoCreateVersion?: boolean
+  issues?: ReleasedIssues
+  sendJiraNotification?: boolean
+  preventFixVersionUpdate?: boolean
 }
 
 export type ReleaseInformationResponse = {
@@ -208,15 +244,15 @@ export class GoliveClient {
     })
   }
 
-  async sendDeploymentInfo(info: DeploymentInformationRequest): Promise<DeploymentInformationResponse> {
-    return this.golive('/deployment-info', {
+  async sendReleaseInfo(info: ReleaseInformationRequest): Promise<ReleaseInformationResponse> {
+    return this.golive('/application/release', {
       method: 'POST',
       body: JSON.stringify(removeUndefined(info))
     })
   }
 
-  async sendReleaseInfo(info: ReleaseInformationRequest): Promise<ReleaseInformationResponse> {
-    return this.golive('/release-info', {
+  async sendEnvironmentInfo(info: EnvironmentInformationRequest): Promise<EnvironmentInformationResponse> {
+    return this.golive('/environment/info', {
       method: 'POST',
       body: JSON.stringify(removeUndefined(info))
     })

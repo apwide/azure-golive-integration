@@ -1,10 +1,9 @@
 import tl = require('azure-pipelines-task-lib/task')
-import { GoliveClient } from './../core/GoliveClient'
-import { log, parseAttributes, parseIssueKeys, unique } from './../core/utils'
+import { DeploymentInfo, EnvironmentInfo, GoliveClient, NamedReference } from './../core/GoliveClient'
+import { debug, fixDate, log, parseAttributes, parseIssueKeys, unique } from './../core/utils'
 import { extractIssueKeysFromCommits } from './../core/scope'
-import { getTargetEnvironmentId } from '../core/target'
 
-type GoliveInputs = {
+type SendEnvironmentInfoInputs = {
   targetAutoCreate?: boolean
   serviceConnection: string
   targetEnvironmentId?: string
@@ -20,15 +19,20 @@ type GoliveInputs = {
   environmentAttributes?: Record<string, string>
 
   deploymentVersionName?: string
+  deploymentDeployedDate?: string
   deploymentBuildNumber?: string
   deploymentDescription?: string
   deploymentIssueKeys?: string[]
   deploymentIssueKeysFromCommitHistory: boolean
+  deploymentJql?: string
   deploymentAttributes?: Record<string, string>
+  deploymentSendJiraNotification: boolean
+  deploymentAddDoneIssuesFixedInVersion: boolean
+  deploymentNoFixVersionUpdate: boolean
 }
 
-function parseInput(): GoliveInputs {
-  return {
+function parseInput(): SendEnvironmentInfoInputs {
+  const inputs: SendEnvironmentInfoInputs = {
     serviceConnection: tl.getInput('serviceConnection', true),
     targetAutoCreate: !!tl.getInput('targetAutoCreate', false),
     targetEnvironmentId: tl.getInput('targetEnvironmentId', false),
@@ -42,62 +46,25 @@ function parseInput(): GoliveInputs {
     environmentUrl: tl.getInput('environmentUrl', false),
     environmentAttributes: parseAttributes(tl.getInput('environmentAttributes', false)),
     deploymentVersionName: tl.getInput('deploymentVersionName', false),
+    deploymentDeployedDate: fixDate(tl.getInput('deploymentDeployedDate', false)),
     deploymentBuildNumber: tl.getInput('deploymentBuildNumber', false),
     deploymentDescription: tl.getInput('deploymentDescription', false),
     deploymentIssueKeys: parseIssueKeys(tl.getInput('deploymentIssueKeys', false)),
     deploymentIssueKeysFromCommitHistory: tl.getBoolInput('deploymentIssueKeysFromCommitHistory', false),
-    deploymentAttributes: parseAttributes(tl.getInput('deploymentAttributes', false))
-  }
-}
-
-async function updateDeployment({ environmentId }) {
-  const issueKeys = await findIssueKeys()
-
-  log('Found issue keys', issueKeys)
-
-  if (!inputs.deploymentVersionName && !inputs.deploymentBuildNumber && !inputs.deploymentDescription && !inputs.deploymentAttributes && !issueKeys.length) {
-    return
+    deploymentJql: tl.getInput('deploymentJql', false),
+    deploymentAttributes: parseAttributes(tl.getInput('deploymentAttributes', false)),
+    deploymentSendJiraNotification: tl.getBoolInput('deploymentSendJiraNotification', false),
+    deploymentAddDoneIssuesFixedInVersion: tl.getBoolInput('deploymentAddDoneIssuesFixedInVersion', false),
+    deploymentNoFixVersionUpdate: tl.getBoolInput('deploymentNoFixVersionUpdate', false)
   }
 
-  const deployment = await golive.deploy(environmentId, {
-    versionName: inputs.deploymentVersionName,
-    buildNumber: inputs.deploymentBuildNumber,
-    description: inputs.deploymentDescription,
-    attributes: inputs.deploymentAttributes,
-    issueKeys
-  })
-  if (!deployment) {
-    log('Environment Deployment unchanged')
-  } else {
-    log('Deployment performed response', deployment)
-  }
-}
-
-async function updateStatus({ environmentId }) {
-  if ((!environmentId && !inputs.environmentStatusName) || (!inputs.environmentStatusId && !inputs.environmentStatusName)) {
-    return
+  if (!inputs.targetEnvironmentId && !inputs.targetEnvironmentName) {
+    throw new Error('At least one of targetEnvironmentId/targetEnvironmentName must be provided')
   }
 
-  const status = await golive.updateStatus(environmentId, {
-    id: inputs.environmentStatusId,
-    name: inputs.environmentStatusName
-  })
-  if (!status) {
-    log('Environment Status unchanged')
-  } else {
-    log('Environment Status changed response', status)
-  }
-}
+  debug(`Inputs are ${JSON.stringify(inputs)}`)
 
-async function updateEnvironment({ environmentId }) {
-  if (!inputs.environmentUrl && !inputs.environmentAttributes) {
-    return
-  }
-  const env = await golive.updateEnvironment(environmentId, {
-    url: inputs.environmentUrl,
-    attributes: inputs.environmentAttributes
-  })
-  log('Environment updated response', env)
+  return inputs
 }
 
 async function findIssueKeys(): Promise<string[]> {
@@ -109,10 +76,54 @@ async function findIssueKeys(): Promise<string[]> {
   if (inputs.deploymentIssueKeysFromCommitHistory) {
     issueKeys = [...issueKeys, ...(await extractIssueKeysFromCommits())]
   }
-  return unique(issueKeys)
+  const found = unique(issueKeys)
+  log('Found issue keys', found)
+  return found
 }
 
-let inputs: GoliveInputs
+async function toDeployment(inputs: SendEnvironmentInfoInputs): Promise<DeploymentInfo | undefined> {
+  const issueKeys = await findIssueKeys()
+  if (!inputs.deploymentVersionName && !inputs.deploymentAttributes && !inputs.deploymentBuildNumber && !inputs.deploymentDescription && !issueKeys.length) {
+    return undefined
+  }
+
+  return {
+    versionName: inputs.deploymentVersionName,
+    attributes: inputs.deploymentAttributes,
+    buildNumber: inputs.deploymentBuildNumber,
+    deployedDate: inputs.deploymentDeployedDate,
+    description: inputs.deploymentDescription,
+    issues: {
+      issueKeys: issueKeys.length ? issueKeys : undefined,
+      jql: inputs.deploymentJql,
+      noFixVersionUpdate: inputs.deploymentNoFixVersionUpdate,
+      addDoneIssuesFixedInVersion: inputs.deploymentAddDoneIssuesFixedInVersion,
+      sendJiraNotification: inputs.deploymentSendJiraNotification
+    }
+  }
+}
+
+function toStatus({ environmentStatusId, environmentStatusName }: SendEnvironmentInfoInputs): NamedReference | undefined {
+  if (!environmentStatusId && !environmentStatusName) {
+    return undefined
+  }
+  return {
+    id: environmentStatusId,
+    name: environmentStatusName
+  }
+}
+
+function toEnvironment({ environmentUrl, environmentAttributes }: SendEnvironmentInfoInputs): EnvironmentInfo | undefined {
+  if (!environmentUrl && !Object.keys(environmentAttributes || {}).length) {
+    return undefined
+  }
+  return {
+    url: environmentUrl,
+    attributes: environmentAttributes
+  }
+}
+
+let inputs: SendEnvironmentInfoInputs
 let golive: GoliveClient
 
 async function run() {
@@ -120,10 +131,35 @@ async function run() {
     inputs = parseInput()
     golive = new GoliveClient({ serviceConnection: inputs.serviceConnection })
 
-    const environmentId = await getTargetEnvironmentId(golive, inputs)
-    await updateDeployment({ environmentId })
-    await updateStatus({ environmentId })
-    await updateEnvironment({ environmentId })
+    const deployment = await toDeployment(inputs)
+    const status = toStatus(inputs)
+    const environment = toEnvironment(inputs)
+
+    if (inputs.targetEnvironmentId && !deployment && !status && !environment) {
+      log(`No information to send to environment ${inputs.targetEnvironmentId}`)
+      return
+    }
+
+    await golive.sendEnvironmentInfo({
+      target: {
+        environment: {
+          id: inputs.targetEnvironmentId,
+          name: inputs.targetEnvironmentName
+        },
+        application: {
+          id: inputs.targetApplicationId,
+          name: inputs.targetApplicationName
+        },
+        category: {
+          id: inputs.targetCategoryId,
+          name: inputs.targetCategoryName
+        },
+        autoCreate: inputs.targetAutoCreate
+      },
+      environment,
+      status,
+      deployment
+    })
   } catch (err) {
     tl.error(err)
     tl.setResult(tl.TaskResult.Failed, err.message)

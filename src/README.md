@@ -91,29 +91,40 @@ pool:
 vmImage: "ubuntu-latest"
 
 steps:
-- task: ApwideGoliveSendEnvironmentInfos@1
-  inputs:
-  serviceConnection: 'apwide.atlassian.net'
-  targetEnvironmentName: 'eCommerce Demo'
-  targetAutoCreate: true
-  targetApplicationName: 'eCommerce'
-  targetCategoryName: 'Demo'
-  deploymentVersionName: 'ECOM 2.3.4.34-SNAPSHOT'
-  deploymentBuildNumber: '$(Build.BuildNumber)'
-  deploymentIssueKeys: 'ECOM-3454,ECOM-3489'
-  deploymentIssueKeysFromCommitHistory: true
-  deploymentDescription: |
-      <b>✅ Job #$(Build.BuildId) - $(Build.DefinitionName)</b>
-      Requested by: $(Build.RequestedFor)
-      Branch: $(Build.SourceBranchName)
-  environmentStatusId: '1'
-  environmentUrl: 'https://ecommerce.staging.company.com'
-  environmentAttributes: |
-      {
-      "OS" : "Linux",
-      "Location" : "Switzerland",
-      "Owner" : "me@company.com"
-      }
+  - task: ApwideGoliveSendEnvironmentInfos@1
+    inputs:
+      serviceConnection: 'apwide.atlassian.net'
+      targetEnvironmentName: 'eCommerce Demo'
+      targetAutoCreate: true
+      targetApplicationName: 'eCommerce'
+      targetCategoryName: 'Demo'
+      deploymentVersionName: 'ECOM 2.3.4.34-SNAPSHOT'
+      deploymentBuildNumber: '$(Build.BuildNumber)'
+      deploymentDeployedDate: '2023-11-15T10:00:00Z'
+      deploymentDescription: |
+          <b>✅ Job #$(Build.BuildId) - $(Build.DefinitionName)</b>
+          Requested by: $(Build.RequestedFor)
+          Branch: $(Build.SourceBranchName)
+      deploymentAttributes: |
+        {
+          "Requested By" : "julien@company.com",
+          "Artefacts" : "https://julien.company.com/download/232323",
+          "Repository" : "https://julien.github.com/"
+        }
+      deploymentIssueKeys: 'ECOM-3454,ECOM-3489'
+      deploymentIssueKeysFromCommitHistory: true
+      deploymentJql: 'project = ECOM and type in (Story)'
+      deploymentAddDoneIssuesFixedInVersion: true
+      deploymentNoFixVersionUpdate: false
+      deploymentSendJiraNotification: false
+      environmentStatusId: '1'
+      environmentUrl: 'https://ecommerce.staging.company.com'
+      environmentAttributes: |
+        {
+        "OS" : "Linux",
+        "Location":"Switzerland",
+        "Owner":"me@company.com"
+        }
 ```
 
 # Send Release Information Task
@@ -155,72 +166,20 @@ You can also choose to trigger a Jira notification to issue participants of issu
 ## YAML configuration
 
 ```yaml
-- task: ApwideGoliveSendReleaseInfosDev@1
+- task: ApwideGoliveSendReleaseInfos@1
   inputs:
     serviceConnection: 'apwide.atlassian.net'
     targetApplicationId: '10'
     versionName: 'ECOM 2.1.0.45-SNAPSHOT'
     versionDescription: 'Enter description of your release here...'
-    versionStartDate: '2023-01-24T12:00:00Z'
-    versionReleaseDate: '2023-09-12T16:00:00Z'
+    versionStartDate: '2023-01-13T12:00:00Z'
+    versionReleaseDate: '2023-09-24T19:00:00Z'
     versionReleased: true
-    autoCreateVersion: 'true'
-    scopeIssueKeys: 'ECOM-3454,ECOM-3489'
-    scopeIssueKeysFromCommitHistory: true
-    scopeJql: 'project = ECP and type in (Story)'
-    sendNotification: true
-```
-
-# Send Deployment Information Task
-
-Notify Golive about the detail of a deployment.
-
-This task will:
-* populate environment/application/category information if requested for and not available into Golive.
-* compute scope of the deployment the same manner it is done for a release.
-* push deployment information to Golive
-* synchronize version/issue information with Jira if requested to or if selected Golive application is configured to synchronize version.
-
-## Graphical assistance configuration
-
-![SendDeploymentInfo.png](images/SendDeploymentInfo.png)
-
-### Target Environment
-Configure the environment being deployed.
-
-When "auto-create" option is selected, depending on information provided to choose an environment such as application and/or category, data
-will be automatically created into Golive.
-
-### Deployment
-General information about current deployment.
-
-### Scope
-Select issues included in the current deployment.
-
-Scope is define the same way than for "Send Release Information" 
-
-## YAML configuration
-
-```yaml
-- task: ApwideGoliveSendDeploymentInfosDev@1
-  inputs:
-    serviceConnection: 'apwide.atlassian.net'
-    targetEnvironmentId: '11'
-    versionName: 'ECOM 2.1.0.45-SNAPSHOT'
-    autoCreateVersion: 'true'
-    deploymentBuildNumber: '${Build.BuildNumber}'
-    deploymentDescription: 'Enter description of your release here...'
-    deploymentAttributes: |
-      {
-        "Requested By" : "me@company.com",
-        "Artefacts" : "https://binaries.company.com/download/232323",
-        "Repository" : "https://github.com/"
-        }
-    deploymentDeployedOn: '2023-11-08T17:20:00Z'
-    deploymentIssueKeys: 'ECOM-3454,ECOM-3489'
-    deploymentIssueKeysFromCommitHistory: true
-    deploymentJql: 'project = ECP and type in (Story)'
-    sendNotification: true
+    issuesNoFixVersionUpdate: false
+    issuesIssueKeys: 'ECOM-3454,ECOM-3489'
+    issuesJql: 'project = ECP and type in (Story)'
+    issuesSendJiraNotification: true
+    issuesIssueKeysFromCommitHistory: true
 ```
 
 # Contact us

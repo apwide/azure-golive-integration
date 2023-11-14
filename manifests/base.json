@@ -198,17 +198,6 @@
       "properties": {
         "name": "send-release-info"
       }
-    },
-    {
-      "id": "ApwideGoliveSendDeploymentInfo",
-      "description": "Task to push deployment information to Apwide Golive",
-      "type": "ms.vss-distributed-task.task",
-      "targets": [
-        "ms.vss-distributed-task.tasks"
-      ],
-      "properties": {
-        "name": "send-deployment-info"
-      }
     }
   ],
   "files": [
@@ -218,10 +207,6 @@
     },
     {
       "path": "send-release-info",
-      "addressable": true
-    },
-    {
-      "path": "send-deployment-info",
       "addressable": true
     },
     {
