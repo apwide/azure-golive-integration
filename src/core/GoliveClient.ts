@@ -132,7 +132,7 @@ export type CreatableNamedReference = {
 export class GoliveClient {
   private readonly golive: any
 
-  constructor({ serviceConnection }: { serviceConnection: string }) {
+  constructor({ taskId, serviceConnection }: { taskId: string; serviceConnection: string }) {
     const goliveBaseUrl = tl.getEndpointUrl(serviceConnection, false)
     const serverEndpointAuth = tl.getEndpointAuthorization(serviceConnection, false)
     const username = serverEndpointAuth.parameters.username
@@ -143,7 +143,7 @@ export class GoliveClient {
     const headers: Record<string, string> = {
       'content-type': 'application/json',
       'accept': 'application/json',
-      'user-agent': 'apwide-golive-azure (v1)',
+      'user-agent': `apwide-golive-azure (${taskId})`,
       ...tokenHeaders(apiToken),
       'Authorization': authenticationScheme === 'Token' ? 'Bearer ' + apiToken : 'Basic ' + toBase64(`${username}:${password}`)
     }

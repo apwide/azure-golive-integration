@@ -19,10 +19,12 @@ module.exports = env => {
   const { major, minor, patch, full } = ComputeVersion()
   console.log(`Version: ${full}`);
 
-  const entries = Object.keys(TaskSettings).reduce((previous, current) => {
-    previous[current] = {
-      import: `./src/${current}/main.ts`,
-      filename: `${current}/main.js`
+  const entries = Object.keys(TaskSettings)
+      .flatMap(task => TaskSettings[task].majorVersions.map(majorVersion => ({ task, majorVersion })))
+      .reduce((previous, { task, majorVersion }) => {
+    previous[`${task}V${majorVersion}`] = {
+      import: `./src/task/${task}/${task}V${majorVersion}/main.ts`,
+      filename: `${task}/${task}V${majorVersion}/main.js`
     }
     return previous
   }, {})
@@ -135,80 +137,89 @@ module.exports = env => {
       ]),
 
       // task
-      ...Object.keys(TaskSettings).flatMap(task => [
-        new CopyPlugin({
-          patterns: [
-            // These files are needed by azure-pipelines-task-lib library.
-            {
-              from: path.resolve('./node_modules/azure-pipelines-task-lib/lib.json'),
-              to: path.join(Target, `${task}`)
-            },
-            {
-              from: path.resolve('./node_modules/azure-pipelines-task-lib/Strings'),
-              to: path.join(Target, `${task}`)
-            },
+      ...Object.keys(TaskSettings).flatMap(task => {
+          return TaskSettings[task].majorVersions.flatMap(majorVersion => {
 
-            {
-              from: path.join(__dirname, `./src/${task}/task.json`),
-              to: path.join(Target, `${task}`)
-            },
-            {
-              from: path.join(__dirname, './images/task.png'),
-              to: path.join(Target, `${task}`, 'icon.png')
-            }
-          ]
-        }),
-        new ReplaceInFileWebpackPlugin([
-          {
-            dir: Target,
-            files: [
-              `${task}/main.js`
-            ],
-            rules: [
-              // This replacement is required to allow azure-pipelines-task-lib to load the
-              // json resource file correctly
-              {
-                search: /__webpack_require__\(.*\)\(resourceFile\)/,
-                replace: 'require(resourceFile)'
-              },
+            const taskFolder =  `${task}/${task}V${majorVersion}`
+            const taskGuid = TaskSettings[task].envs[buildEnv].TaskGuid
+            const tag = ExtensionSettings[buildEnv].Tag
+
+            return [
+              new CopyPlugin({
+                patterns: [
+                  // These files are needed by azure-pipelines-task-lib library.
+                  {
+                    from: path.resolve('./node_modules/azure-pipelines-task-lib/lib.json'),
+                    to: path.join(Target, taskFolder)
+                  },
+                  {
+                    from: path.resolve('./node_modules/azure-pipelines-task-lib/Strings'),
+                    to: path.join(Target, taskFolder)
+                  },
+
+                  {
+                    from: path.join(__dirname, `/src/task/${taskFolder}/task.json`),
+                    to: path.join(Target, taskFolder)
+                  },
+                  {
+                    from: path.join(__dirname, './images/task.png'),
+                    to: path.join(Target, taskFolder, '/icon.png')
+                  }
+                ]
+              }),
+              new ReplaceInFileWebpackPlugin([
+                {
+                  dir: Target,
+                  files: [
+                    `${taskFolder}/main.js`
+                  ],
+                  rules: [
+                    // This replacement is required to allow azure-pipelines-task-lib to load the
+                    // json resource file correctly
+                    {
+                      search: /__webpack_require__\(.*\)\(resourceFile\)/,
+                      replace: 'require(resourceFile)'
+                    },
+                  ]
+                }
+              ]),
+              new ReplaceInFileWebpackPlugin([
+                {
+                  dir: Target,
+                  files: [
+                    `${taskFolder}/task.json`
+                  ],
+                  rules: [
+                    {
+                      search: /{{taskid}}/ig,
+                      replace: taskGuid
+                    },
+                    {
+                      search: /{{tag}}/ig,
+                      replace: tag
+                    },
+                    {
+                      search: /{{version}}/ig,
+                      replace: full
+                    },
+                    {
+                      search: /({{major}}|\"{{major}}\")/ig,
+                      replace: majorVersion
+                    },
+                    {
+                      search: /({{minor}}|\"{{minor}}\")/ig,
+                      replace: minor
+                    },
+                    {
+                      search: /({{patch}}|\"{{patch}}\")/ig,
+                      replace: patch
+                    }
+                  ]
+                }
+              ])
             ]
-          }
-        ]),
-        new ReplaceInFileWebpackPlugin([
-          {
-            dir: Target,
-            files: [
-              `${task}/task.json`
-            ],
-            rules: [
-              {
-                search: /{{taskid}}/ig,
-                replace: TaskSettings[task][buildEnv].TaskGuid
-              },
-              {
-                search: /{{tag}}/ig,
-                replace: ExtensionSettings[buildEnv].Tag
-              },
-              {
-                search: /{{version}}/ig,
-                replace: full
-              },
-              {
-                search: /({{major}}|\"{{major}}\")/ig,
-                replace: major
-              },
-              {
-                search: /({{minor}}|\"{{minor}}\")/ig,
-                replace: minor
-              },
-              {
-                search: /({{patch}}|\"{{patch}}\")/ig,
-                replace: patch
-              }
-            ]
-          }
-        ])
-      ])
+          })
+        })
     ]
   }
 }

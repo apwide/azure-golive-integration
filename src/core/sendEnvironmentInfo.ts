@@ -1,17 +1,19 @@
 import tl = require('azure-pipelines-task-lib/task')
-import { DeploymentInfo, EnvironmentInfo, GoliveClient, NamedReference } from './../core/GoliveClient'
-import { debug, fixDate, log, parseAttributes, parseIssueKeys, unique } from './../core/utils'
-import { extractIssueKeysFromCommits } from './../core/scope'
+import { log, unique } from '../core/utils'
+import { extractIssueKeysFromCommits } from '../core/scope'
+import { DeploymentInfo, EnvironmentInfo, GoliveClient, NamedReference } from '../core/GoliveClient'
 
-type SendEnvironmentInfoInputs = {
-  targetAutoCreate?: boolean
+export type SendEnvironmentInfoInputs = {
   serviceConnection: string
   targetEnvironmentId?: string
   targetEnvironmentName?: string
+  targetEnvironmentAutoCreate?: boolean
   targetCategoryName?: string
   targetCategoryId?: string
+  targetCategoryAutoCreate?: boolean
   targetApplicationId?: string
   targetApplicationName?: string
+  targetApplicationAutoCreate?: boolean
   environmentStatusId?: string
   environmentStatusName?: string
 
@@ -31,43 +33,7 @@ type SendEnvironmentInfoInputs = {
   deploymentNoFixVersionUpdate: boolean
 }
 
-function parseInput(): SendEnvironmentInfoInputs {
-  const inputs: SendEnvironmentInfoInputs = {
-    serviceConnection: tl.getInput('serviceConnection', true),
-    targetAutoCreate: !!tl.getInput('targetAutoCreate', false),
-    targetEnvironmentId: tl.getInput('targetEnvironmentId', false),
-    targetEnvironmentName: tl.getInput('targetEnvironmentName', false),
-    targetCategoryName: tl.getInput('targetCategoryName', false),
-    targetCategoryId: tl.getInput('targetCategoryId', false),
-    targetApplicationId: tl.getInput('targetApplicationId', false),
-    targetApplicationName: tl.getInput('targetApplicationName', false),
-    environmentStatusId: tl.getInput('environmentStatusId', false),
-    environmentStatusName: tl.getInput('environmentStatusName', false),
-    environmentUrl: tl.getInput('environmentUrl', false),
-    environmentAttributes: parseAttributes(tl.getInput('environmentAttributes', false)),
-    deploymentVersionName: tl.getInput('deploymentVersionName', false),
-    deploymentDeployedDate: fixDate(tl.getInput('deploymentDeployedDate', false)),
-    deploymentBuildNumber: tl.getInput('deploymentBuildNumber', false),
-    deploymentDescription: tl.getInput('deploymentDescription', false),
-    deploymentIssueKeys: parseIssueKeys(tl.getInput('deploymentIssueKeys', false)),
-    deploymentIssueKeysFromCommitHistory: tl.getBoolInput('deploymentIssueKeysFromCommitHistory', false),
-    deploymentJql: tl.getInput('deploymentJql', false),
-    deploymentAttributes: parseAttributes(tl.getInput('deploymentAttributes', false)),
-    deploymentSendJiraNotification: tl.getBoolInput('deploymentSendJiraNotification', false),
-    deploymentAddDoneIssuesFixedInVersion: tl.getBoolInput('deploymentAddDoneIssuesFixedInVersion', false),
-    deploymentNoFixVersionUpdate: tl.getBoolInput('deploymentNoFixVersionUpdate', false)
-  }
-
-  if (!inputs.targetEnvironmentId && !inputs.targetEnvironmentName) {
-    throw new Error('At least one of targetEnvironmentId/targetEnvironmentName must be provided')
-  }
-
-  debug(`Inputs are ${JSON.stringify(inputs)}`)
-
-  return inputs
-}
-
-async function findIssueKeys(): Promise<string[]> {
+async function findIssueKeys(inputs: SendEnvironmentInfoInputs): Promise<string[]> {
   let issueKeys = []
   if (inputs.deploymentIssueKeys) {
     log('Loading Issue keys from input')
@@ -82,7 +48,7 @@ async function findIssueKeys(): Promise<string[]> {
 }
 
 async function toDeployment(inputs: SendEnvironmentInfoInputs): Promise<DeploymentInfo | undefined> {
-  const issueKeys = await findIssueKeys()
+  const issueKeys = await findIssueKeys(inputs)
   if (!inputs.deploymentVersionName && !inputs.deploymentAttributes && !inputs.deploymentBuildNumber && !inputs.deploymentDescription && !issueKeys.length) {
     return undefined
   }
@@ -123,13 +89,10 @@ function toEnvironment({ environmentUrl, environmentAttributes }: SendEnvironmen
   }
 }
 
-let inputs: SendEnvironmentInfoInputs
-let golive: GoliveClient
-
-async function run() {
+export async function sendEnvironmentInfo(taskId: string, GetInputs: () => SendEnvironmentInfoInputs) {
   try {
-    inputs = parseInput()
-    golive = new GoliveClient({ serviceConnection: inputs.serviceConnection })
+    const inputs = GetInputs()
+    const golive = new GoliveClient({ taskId, serviceConnection: inputs.serviceConnection })
 
     const deployment = await toDeployment(inputs)
     const status = toStatus(inputs)
@@ -145,17 +108,17 @@ async function run() {
         environment: {
           id: inputs.targetEnvironmentId,
           name: inputs.targetEnvironmentName,
-          autoCreate: inputs.targetAutoCreate
+          autoCreate: inputs.targetEnvironmentAutoCreate
         },
         application: {
           id: inputs.targetApplicationId,
           name: inputs.targetApplicationName,
-          autoCreate: inputs.targetAutoCreate
+          autoCreate: inputs.targetApplicationAutoCreate
         },
         category: {
           id: inputs.targetCategoryId,
           name: inputs.targetCategoryName,
-          autoCreate: inputs.targetAutoCreate
+          autoCreate: inputs.targetCategoryAutoCreate
         }
       },
       environment,
@@ -167,5 +130,3 @@ async function run() {
     tl.setResult(tl.TaskResult.Failed, err.message)
   }
 }
-
-run()

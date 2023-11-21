@@ -1,8 +1,8 @@
 import tl = require('azure-pipelines-task-lib/task')
-import { debug, fixDate, log, parseDefaultBoolean, parseIssueKeys, unique } from '../core/utils'
-import { GoliveClient } from '../core/GoliveClient'
-import { extractIssueKeysFromCommits } from '../core/scope'
-import { getTargetApplicationId } from '../core/target'
+import { debug, fixDate, log, parseDefaultBoolean, parseIssueKeys, unique } from '../../../core/utils'
+import { GoliveClient } from '../../../core/GoliveClient'
+import { extractIssueKeysFromCommits } from '../../../core/scope'
+import { getTargetApplicationId } from '../../../core/target'
 
 type ReleaseTaskInputs = {
   serviceConnection: string
@@ -68,7 +68,7 @@ async function findIssueKeys(): Promise<string[]> {
 async function run() {
   try {
     inputs = parseInputs()
-    golive = new GoliveClient({ serviceConnection: inputs.serviceConnection })
+    golive = new GoliveClient({ taskId: 'send-release-info', serviceConnection: inputs.serviceConnection })
 
     const applicationId = await getTargetApplicationId(golive, inputs)
     const info = await golive.sendReleaseInfo({

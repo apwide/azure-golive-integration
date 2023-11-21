@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 import * as path from 'path'
-import { assertInConsole, assertNotInConsole, getBodySentTo, mockServiceConnection, runTest } from '../../tests/azureHelpers'
-import { EnvironmentInformationRequest } from '../../core/GoliveClient'
+import { assertInConsole, assertNotInConsole, getBodySentTo, mockServiceConnection, runTest } from '../../../../tests/azureHelpers'
+import { EnvironmentInformationRequest } from '../../../../core/GoliveClient'
 
 function test(file: string): string {
   return path.join(__dirname, file)

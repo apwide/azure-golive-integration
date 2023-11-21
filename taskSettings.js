@@ -9,20 +9,26 @@ const ExtensionSettings = {
 }
 
 const TaskSettings = {
-  'environment-info': {
-    production: {
-      TaskGuid: 'c5ed4c98-e170-4820-877d-cf58c5ee2fcd'
-    },
-    development: {
-      TaskGuid: '282ea6d5-b7b2-49eb-897a-a68bf88c4910'
+  'EnvironmentInfo': {
+    majorVersions: ['1', '2'],
+    envs: {
+      production: {
+        TaskGuid: 'c5ed4c98-e170-4820-877d-cf58c5ee2fcd'
+      },
+      development: {
+        TaskGuid: '282ea6d5-b7b2-49eb-897a-a68bf88c4910'
+      }
     }
   },
-  'send-release-info': {
-    production: {
-      TaskGuid: '4451bb99-46d9-4b3b-bbfc-bfba4a931c55'
-    },
-    development: {
-      TaskGuid: 'b8fb09a7-d958-46b2-baac-3d1dbc1a1faa'
+  'SendReleaseInfo': {
+    majorVersions: ['1'],
+    envs: {
+      production: {
+        TaskGuid: '4451bb99-46d9-4b3b-bbfc-bfba4a931c55'
+      },
+      development: {
+        TaskGuid: 'b8fb09a7-d958-46b2-baac-3d1dbc1a1faa'
+      }
     }
   }
 }
