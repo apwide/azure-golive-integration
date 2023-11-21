@@ -185,7 +185,7 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "environment-info"
+        "name": "EnvironmentInfo"
       }
     },
     {
@@ -196,17 +196,21 @@
         "ms.vss-distributed-task.tasks"
       ],
       "properties": {
-        "name": "send-release-info"
+        "name": "SendReleaseInfo"
       }
     }
   ],
   "files": [
     {
-      "path": "environment-info",
+      "path": "EnvironmentInfo/EnvironmentInfoV1",
       "addressable": true
     },
     {
-      "path": "send-release-info",
+      "path": "EnvironmentInfo/EnvironmentInfoV2",
+      "addressable": true
+    },
+    {
+      "path": "SendReleaseInfo/SendReleaseInfoV1",
       "addressable": true
     },
     {

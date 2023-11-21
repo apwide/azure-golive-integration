@@ -1,4 +1,4 @@
-import { assertContains, assertInConsole, mockServiceConnection, runTest } from '../../tests/azureHelpers'
+import { assertContains, assertInConsole, mockServiceConnection, runTest } from '../../../../tests/azureHelpers'
 import * as assert from 'assert'
 import * as path from 'path'
 

@@ -12,11 +12,11 @@
   ],
   "demands": [],
   "version": {
-    "Major": "{{major}}",
+    "Major": "2",
     "Minor": "{{minor}}",
     "Patch": "{{patch}}"
   },
-  "minimumAgentVersion": "1.95.0",
+  "minimumAgentVersion": "2.144.0",
   "instanceNameFormat": "Service Endpoint Build Task $(project)",
   "groups": [
     {
@@ -70,7 +70,7 @@
       "groupName": "target"
     },
     {
-      "name": "targetAutoCreate",
+      "name": "targetEnvironmentAutoCreate",
       "type": "boolean",
       "label": "auto create (if not found)",
       "required": false,
@@ -87,7 +87,7 @@
       "label": "Application Name",
       "required": false,
       "helpMarkDown": "Type the name of the application to select or create the target environment. \nA new Application will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage applications in order to automatically create new applications.",
-      "visibleRule": "targetAutoCreate == true",
+      "visibleRule": "targetEnvironmentAutoCreate == true",
       "groupName": "target"
     },
     {
@@ -99,7 +99,19 @@
       "properties": {
         "EditableOptions": "True"
       },
-      "visibleRule": "targetAutoCreate == true && targetApplicationName == ''",
+      "visibleRule": "targetEnvironmentAutoCreate == true && targetApplicationName == ''",
+      "groupName": "target"
+    },
+    {
+      "name": "targetApplicationAutoCreate",
+      "type": "boolean",
+      "label": "auto create (if not found)",
+      "required": false,
+      "helpMarkDown": "Try to create the target environment with provided information if it does not exist yet in Apwide Golive.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetEnvironmentName != '' && targetApplicationName != ''",
       "groupName": "target"
     },
     {
@@ -108,7 +120,7 @@
       "label": "Category Name",
       "required": false,
       "helpMarkDown": "Type the name of the category to find/create the target environment. \nA new Category will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage categories in order to automatically create new categories.",
-      "visibleRule": "targetAutoCreate == true",
+      "visibleRule": "targetEnvironmentAutoCreate == true",
       "groupName": "target"
     },
     {
@@ -120,7 +132,19 @@
       "properties": {
         "EditableOptions": "True"
       },
-      "visibleRule": "targetAutoCreate == true && targetCategoryName == ''",
+      "visibleRule": "targetEnvironmentAutoCreate == true && targetCategoryName == ''",
+      "groupName": "target"
+    },
+    {
+      "name": "targetCategoryAutoCreate",
+      "type": "boolean",
+      "label": "auto create (if not found)",
+      "required": false,
+      "helpMarkDown": "Try to create the target environment with provided information if it does not exist yet in Apwide Golive.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "targetEnvironmentName != '' && targetCategoryName != ''",
       "groupName": "target"
     },
     {
