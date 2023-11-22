@@ -70,7 +70,6 @@ export type ReleasedIssues = {
   issueKeys?: string[]
   jql?: string
   sendJiraNotification?: boolean
-  noFixVersionUpdate?: boolean
 }
 
 export type ReleaseInformationRequest = {

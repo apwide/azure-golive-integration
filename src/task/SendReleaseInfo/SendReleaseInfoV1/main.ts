@@ -18,7 +18,6 @@ type ReleaseTaskInputs = {
   issuesIssueKeysFromCommitHistory?: boolean
   issuesJql?: string
   issuesSendJiraNotification?: boolean
-  issuesNoFixVersionUpdate?: boolean
 }
 
 function parseInputs(): ReleaseTaskInputs {
@@ -35,8 +34,7 @@ function parseInputs(): ReleaseTaskInputs {
     issuesIssueKeys: parseIssueKeys(tl.getInput('issuesIssueKeys', false)),
     issuesIssueKeysFromCommitHistory: tl.getBoolInput('issuesIssueKeysFromCommitHistory', false),
     issuesJql: tl.getInput('issuesJql', false),
-    issuesSendJiraNotification: tl.getBoolInput('issuesSendJiraNotification', false),
-    issuesNoFixVersionUpdate: tl.getBoolInput('issuesNoFixVersionUpdate', false)
+    issuesSendJiraNotification: tl.getBoolInput('issuesSendJiraNotification', false)
   }
 
   if (!inputs.targetApplicationId && !inputs.targetApplicationName) {
@@ -83,7 +81,6 @@ async function run() {
       issues: {
         issueKeys: await findIssueKeys(),
         jql: inputs.issuesJql,
-        noFixVersionUpdate: inputs.issuesNoFixVersionUpdate,
         sendJiraNotification: inputs.issuesSendJiraNotification
       }
     })

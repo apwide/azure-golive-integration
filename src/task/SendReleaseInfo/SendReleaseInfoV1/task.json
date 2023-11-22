@@ -110,20 +110,11 @@
       "groupName": "version"
     },
     {
-      "name": "issuesNoFixVersionUpdate",
-      "type": "boolean",
-      "label": "Prevent Fix Version Update",
-      "required": false,
-      "helpMarkDown": "Prevent updating release issues fix version field.",
-      "groupName": "issues"
-    },
-    {
       "name": "issuesIssueKeys",
       "type": "string",
       "label": "Jira Issue Keys",
       "required": false,
       "helpMarkDown": "Comma separated list of Jira Issue Keys included in the release. Ex: ECOM-3412,ECOM-6783,PAY-98",
-      "visibleRule": "issuesNoFixVersionUpdate != true",
       "groupName": "issues"
     },
     {
@@ -133,7 +124,6 @@
       "label": "Jira Issue Keys from Commit History",
       "required": false,
       "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as part of scope.",
-      "visibleRule": "issuesNoFixVersionUpdate != true",
       "groupName": "issues"
     },
     {
@@ -142,7 +132,6 @@
       "label": "Jira JQL",
       "required": false,
       "helpMarkDown": "JQL filter used to retrieve Jira Issue Keys included in the release. Ex: project = ECP AND type in (Story, Bug)",
-      "visibleRule": "issuesNoFixVersionUpdate != true",
       "groupName": "issues"
     },
     {
@@ -151,7 +140,6 @@
       "label": "Notify",
       "required": false,
       "helpMarkDown": "Trigger a Jira notification for issues updated with a fix version.",
-      "visibleRule": "issuesNoFixVersionUpdate != true",
       "groupName": "issues"
     }
   ],
