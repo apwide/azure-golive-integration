@@ -32,7 +32,7 @@ describe('Send Release Infos Test Suite', () => {
   it('should detect when no target application', (done: Mocha.Done) => {
     runTest(test('withMissingTargetApp'), done, (tr) => {
       assert.equal(tr.succeeded, false)
-      assertContains(tr.errorIssues, 'At least one of targetApplicationId/targetApplicationName must be provided')
+      assertContains(tr.errorIssues, 'At least one of applicationId/applicationName must be provided')
     })
   })
 })

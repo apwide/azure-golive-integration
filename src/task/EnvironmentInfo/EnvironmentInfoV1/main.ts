@@ -25,10 +25,10 @@ function parseInput(): SendEnvironmentInfoInputs {
     deploymentDescription: tl.getInput('deploymentDescription', false),
     deploymentIssueKeys: parseIssueKeys(tl.getInput('deploymentIssueKeys', false)),
     deploymentIssueKeysFromCommitHistory: tl.getBoolInput('deploymentIssueKeysFromCommitHistory', false),
-    deploymentJql: tl.getInput('deploymentJql', false),
+    deploymentIssuesFromJql: tl.getInput('deploymentIssuesFromJql', false),
     deploymentAttributes: parseAttributes(tl.getInput('deploymentAttributes', false)),
     deploymentSendJiraNotification: tl.getBoolInput('deploymentSendJiraNotification', false),
-    deploymentAddDoneIssuesFixedInVersion: tl.getBoolInput('deploymentAddDoneIssuesFixedInVersion', false),
+    deploymentAddDoneIssuesOfJiraVersion: tl.getBoolInput('deploymentAddDoneIssuesOfJiraVersion', false),
     deploymentNoFixVersionUpdate: tl.getBoolInput('deploymentNoFixVersionUpdate', false)
   }
 

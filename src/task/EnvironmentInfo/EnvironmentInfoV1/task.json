@@ -4,7 +4,7 @@
   "friendlyName": "Apwide Golive Environment Deprecated {{tag}}",
   "description": "Send environment information to Apwide Golive for Jira",
   "author": "apwide",
-  "helpMarkDown": "Learn more about Apwide Golive and Environment Tracking [here](https://www.apwide.com/documentation/cloud/track-environments)",
+  "helpMarkDown": "Learn more about Apwide Golive integration with Azure DevOps [here](https://marketplace.visualstudio.com/items?itemName=Apwide.ApwideGoliveForJira{{tag}})",
   "category": "Build",
   "visibility": [
     "Build",
@@ -161,7 +161,7 @@
       "groupName": "deployment"
     },
     {
-      "name": "deploymentAddDoneIssuesFixedInVersion",
+      "name": "deploymentAddDoneIssuesOfJiraVersion",
       "type": "boolean",
       "label": "Link Done Issues",
       "required": false,
@@ -186,7 +186,7 @@
       "groupName": "deployment"
     },
     {
-      "name": "deploymentJql",
+      "name": "deploymentIssuesFromJql",
       "type": "string",
       "label": "Jira JQL",
       "required": false,
