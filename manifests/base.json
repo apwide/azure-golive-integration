@@ -189,7 +189,7 @@
       }
     },
     {
-      "id": "ApwideGoliveSendReleaseInfo",
+      "id": "ApwideGoliveSendReleaseInfos",
       "description": "Task to push release information to Apwide Golive",
       "type": "ms.vss-distributed-task.task",
       "targets": [

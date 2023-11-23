@@ -14,31 +14,31 @@ type ReleaseTaskInputs = {
   versionStartDate?: string
   versionReleaseDate?: string
   versionReleased?: boolean
-  issuesIssueKeys?: string[]
-  issuesIssueKeysFromCommitHistory?: boolean
-  issuesJql?: string
-  issuesSendJiraNotification?: boolean
+  issueKeys?: string[]
+  issueKeysFromCommitHistory?: boolean
+  issuesFromJql?: string
+  sendJiraNotification?: boolean
 }
 
 function parseInputs(): ReleaseTaskInputs {
   const inputs: ReleaseTaskInputs = {
     serviceConnection: tl.getInput('serviceConnection', true),
     targetAutoCreate: !!tl.getInput('targetAutoCreate', false),
-    targetApplicationId: tl.getInput('targetApplicationId', false),
-    targetApplicationName: tl.getInput('targetApplicationName', false),
+    targetApplicationId: tl.getInput('applicationId', false), //TODO: rename targetApplicationId
+    targetApplicationName: tl.getInput('applicationName', false), //TODO: rename targetApplicationName
     versionName: tl.getInput('versionName', true),
     versionDescription: tl.getInput('versionDescription', false),
     versionStartDate: fixDate(tl.getInput('versionStartDate', false)),
     versionReleaseDate: fixDate(tl.getInput('versionReleaseDate', false)),
     versionReleased: tl.getBoolInput('versionReleased', false),
-    issuesIssueKeys: parseIssueKeys(tl.getInput('issuesIssueKeys', false)),
-    issuesIssueKeysFromCommitHistory: tl.getBoolInput('issuesIssueKeysFromCommitHistory', false),
-    issuesJql: tl.getInput('issuesJql', false),
-    issuesSendJiraNotification: tl.getBoolInput('issuesSendJiraNotification', false)
+    issueKeys: parseIssueKeys(tl.getInput('issueKeys', false)),
+    issueKeysFromCommitHistory: tl.getBoolInput('issueKeysFromCommitHistory', false),
+    issuesFromJql: tl.getInput('issuesFromJql', false),
+    sendJiraNotification: tl.getBoolInput('sendJiraNotification', false)
   }
 
   if (!inputs.targetApplicationId && !inputs.targetApplicationName) {
-    throw new Error('At least one of targetApplicationId/targetApplicationName must be provided')
+    throw new Error('At least one of applicationId/applicationName must be provided')
   }
 
   debug(`Inputs are ${JSON.stringify(inputs)}`)
@@ -51,11 +51,11 @@ let golive: GoliveClient
 
 async function findIssueKeys(): Promise<string[]> {
   let issueKeys = []
-  if (inputs.issuesIssueKeys) {
+  if (inputs.issueKeys) {
     log('Loading Issue keys from input')
-    issueKeys = [...issueKeys, ...inputs.issuesIssueKeys]
+    issueKeys = [...issueKeys, ...inputs.issueKeys]
   }
-  if (inputs.issuesIssueKeysFromCommitHistory) {
+  if (inputs.issueKeysFromCommitHistory) {
     issueKeys = [...issueKeys, ...(await extractIssueKeysFromCommits())]
   }
   const found = unique(issueKeys)
@@ -80,8 +80,8 @@ async function run() {
       released: inputs.versionReleased,
       issues: {
         issueKeys: await findIssueKeys(),
-        jql: inputs.issuesJql,
-        sendJiraNotification: inputs.issuesSendJiraNotification
+        jql: inputs.issuesFromJql,
+        sendJiraNotification: inputs.sendJiraNotification
       }
     })
 

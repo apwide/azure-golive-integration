@@ -113,8 +113,8 @@ steps:
         }
       deploymentIssueKeys: 'ECOM-3454,ECOM-3489'
       deploymentIssueKeysFromCommitHistory: true
-      deploymentJql: 'project = ECOM and type in (Story)'
-      deploymentAddDoneIssuesFixedInVersion: true
+      deploymentIssuesFromJql: 'project = ECOM and type in (Story)'
+      deploymentAddDoneIssuesOfJiraVersion: true
       deploymentNoFixVersionUpdate: false
       deploymentSendJiraNotification: false
       environmentStatusId: '1'
@@ -169,17 +169,17 @@ You can also choose to trigger a Jira notification to issue participants of issu
 - task: ApwideGoliveSendReleaseInfos@1
   inputs:
     serviceConnection: 'apwide.atlassian.net'
-    targetApplicationId: '10'
+    applicationId: '10'
     versionName: 'ECOM 2.1.0.45-SNAPSHOT'
     versionDescription: 'Enter description of your release here...'
     versionStartDate: '2023-01-13T12:00:00Z'
     versionReleaseDate: '2023-09-24T19:00:00Z'
     versionReleased: true
     issuesNoFixVersionUpdate: false
-    issuesIssueKeys: 'ECOM-3454,ECOM-3489'
-    issuesJql: 'project = ECP and type in (Story)'
-    issuesSendJiraNotification: true
-    issuesIssueKeysFromCommitHistory: true
+    issueKeys: 'ECOM-3454,ECOM-3489'
+    issuesFromJql: 'project = ECP and type in (Story)'
+    sendJiraNotification: true
+    issueKeysFromCommitHistory: true
 ```
 
 # Contact us

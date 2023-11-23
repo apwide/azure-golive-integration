@@ -2,9 +2,9 @@
   "id": "{{taskid}}",
   "name": "ApwideGoliveSendReleaseInfos{{tag}}",
   "friendlyName": "Apwide Golive Release{{tag}}",
-  "description": "Send release information to Apwide Golive for Jira",
+  "description": "Create and update Jira version/release when a Golive application is built/released.",
   "author": "apwide",
-  "helpMarkDown": "Learn more about Apwide Golive and Environment Tracking [here](https://www.apwide.com/documentation/cloud/track-environments)",
+  "helpMarkDown": "Learn more about Apwide Golive integration with Azure DevOps [here](https://marketplace.visualstudio.com/items?itemName=Apwide.ApwideGoliveForJira{{tag}})",
   "category": "Build",
   "visibility": [
     "Build",
@@ -21,17 +21,12 @@
   "groups": [
     {
       "name": "target",
-      "displayName": "Target Application",
+      "displayName": "Application",
       "isExpanded": true
     },
     {
       "name": "version",
-      "displayName": "Version",
-      "isExpanded": true
-    },
-    {
-      "name": "issues",
-      "displayName": "Issues",
+      "displayName": "Version / Release",
       "isExpanded": true
     }
   ],
@@ -45,31 +40,31 @@
       "helpMarkDown": "Apwide Golive for Jira connection to use. If needed, select 'Project settings', and create a new 'Service Connection' of type 'Apwide Golive for Jira'."
     },
     {
-      "name": "targetApplicationName",
+      "name": "applicationName",
       "type": "string",
       "label": "Application Name",
       "required": false,
-      "helpMarkDown": "Type the name of the application to select or create the target environment. \nA new Application will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage applications in order to automatically create new applications.",
+      "helpMarkDown": "Type the name of the released application.",
       "groupName": "target"
     },
     {
-      "name": "targetApplicationId",
+      "name": "applicationId",
       "type": "pickList",
       "label": "Application ID",
       "required": false,
-      "helpMarkDown": "Select an existing application to use to find/create the target environment.",
+      "helpMarkDown": "Select the id of the released application.",
       "properties": {
         "EditableOptions": "True"
       },
-      "visibleRule": "targetApplicationName == ''",
+      "visibleRule": "applicationName == ''",
       "groupName": "target"
     },
     {
       "name": "versionName",
       "type": "string",
-      "label": "Version Name",
+      "label": "Name",
       "required": true,
-      "helpMarkDown": "Deployed version",
+      "helpMarkDown": "Name of the current Jira version/release",
       "groupName": "version"
     },
     {
@@ -77,7 +72,7 @@
       "type": "multiline",
       "label": "Description",
       "required": false,
-      "helpMarkDown": "Description of the version.",
+      "helpMarkDown": "Description of the current Jira version/release.",
       "properties": {
         "resizable": "true",
         "rows": "10",
@@ -98,7 +93,7 @@
       "type": "string",
       "label": "Release Date",
       "required": false,
-      "helpMarkDown": "Date in ISO-8601 format. Ex: 2023-09-24T12:00:00Z",
+      "helpMarkDown": "Date in ISO-8601 format. Ex: 2023-10-24T12:00:00Z",
       "groupName": "version"
     },
     {
@@ -106,46 +101,46 @@
       "type": "boolean",
       "label": "Released",
       "required": false,
-      "helpMarkDown": "Is the Version released",
+      "helpMarkDown": "Mark the current Jira version as released.",
       "groupName": "version"
     },
     {
-      "name": "issuesIssueKeys",
+      "name": "issueKeys",
       "type": "string",
       "label": "Jira Issue Keys",
       "required": false,
-      "helpMarkDown": "Comma separated list of Jira Issue Keys included in the release. Ex: ECOM-3412,ECOM-6783,PAY-98",
-      "groupName": "issues"
+      "helpMarkDown": "Comma separated list of Issue Keys to add to the current Jira version/release. Ex: ECOM-3412,ECOM-6783,PAY-98",
+      "groupName": "version"
     },
     {
-      "name": "issuesIssueKeysFromCommitHistory",
+      "name": "issueKeysFromCommitHistory",
       "type": "boolean",
       "defaultValue": false,
-      "label": "Jira Issue Keys from Commit History",
+      "label": "Extract Jira Issue Keys from commits",
       "required": false,
-      "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as part of scope.",
-      "groupName": "issues"
+      "helpMarkDown": "Parse and retrieve the Jira issue keys found in commit history and add issues to the current Jira version/release.",
+      "groupName": "version"
     },
     {
-      "name": "issuesJql",
+      "name": "issuesFromJql",
       "type": "string",
-      "label": "Jira JQL",
+      "label": "Jira Issues from JQL",
       "required": false,
-      "helpMarkDown": "JQL filter used to retrieve Jira Issue Keys included in the release. Ex: project = ECP AND type in (Story, Bug)",
-      "groupName": "issues"
+      "helpMarkDown": "Set the JQL query used to retrieve and add issues to the current Jira version/release. \nEx: project = ECP AND type in (Story, Bug) AND resolution in (Fixed).\nMore about JQL [here](https://www.atlassian.com/software/jira/guides/jql)",
+      "groupName": "version"
     },
     {
-      "name": "issuesSendJiraNotification",
+      "name": "sendJiraNotification",
       "type": "boolean",
-      "label": "Notify",
+      "label": "Send Jira Notifications",
       "required": false,
-      "helpMarkDown": "Trigger a Jira notification for issues updated with a fix version.",
-      "groupName": "issues"
+      "helpMarkDown": "Trigger the standard Jira notification when issues are added to the current Jira version/release.",
+      "groupName": "version"
     }
   ],
   "dataSourceBindings": [
     {
-      "target": "targetApplicationId",
+      "target": "applicationId",
       "endpointId": "$(serviceConnection)",
       "dataSourceName": "applications",
       "resultTemplate": "{ \"Value\" : \"{{{id}}}\", \"DisplayValue\":\"{{{id}}} - {{{name}}}\"}"

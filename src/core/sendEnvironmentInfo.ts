@@ -26,10 +26,10 @@ export type SendEnvironmentInfoInputs = {
   deploymentDescription?: string
   deploymentIssueKeys?: string[]
   deploymentIssueKeysFromCommitHistory: boolean
-  deploymentJql?: string
+  deploymentIssuesFromJql?: string
   deploymentAttributes?: Record<string, string>
   deploymentSendJiraNotification: boolean
-  deploymentAddDoneIssuesFixedInVersion: boolean
+  deploymentAddDoneIssuesOfJiraVersion: boolean
   deploymentNoFixVersionUpdate: boolean
 }
 
@@ -61,9 +61,9 @@ async function toDeployment(inputs: SendEnvironmentInfoInputs): Promise<Deployme
     description: inputs.deploymentDescription,
     issues: {
       issueKeys: issueKeys.length ? issueKeys : undefined,
-      jql: inputs.deploymentJql,
+      jql: inputs.deploymentIssuesFromJql,
       noFixVersionUpdate: inputs.deploymentNoFixVersionUpdate,
-      addDoneIssuesFixedInVersion: inputs.deploymentAddDoneIssuesFixedInVersion,
+      addDoneIssuesFixedInVersion: inputs.deploymentAddDoneIssuesOfJiraVersion,
       sendJiraNotification: inputs.deploymentSendJiraNotification
     }
   }

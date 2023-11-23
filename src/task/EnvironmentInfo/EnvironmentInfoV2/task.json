@@ -4,7 +4,7 @@
   "friendlyName": "Apwide Golive Environment{{tag}}",
   "description": "Send environment information to Apwide Golive for Jira",
   "author": "apwide",
-  "helpMarkDown": "Learn more about Apwide Golive and Environment Tracking [here](https://www.apwide.com/documentation/cloud/track-environments)",
+  "helpMarkDown": "Learn more about Apwide Golive integration with Azure DevOps [here](https://marketplace.visualstudio.com/items?itemName=Apwide.ApwideGoliveForJira{{tag}})",
   "category": "Build",
   "visibility": [
     "Build",
@@ -74,7 +74,7 @@
       "type": "boolean",
       "label": "auto create (if not found)",
       "required": false,
-      "helpMarkDown": "Try to create the target environment with provided information if it does not exist yet in Apwide Golive.",
+      "helpMarkDown": "Create the target environment with provided information if it does not exist yet in Apwide Golive.",
       "properties": {
         "EditableOptions": "True"
       },
@@ -86,7 +86,7 @@
       "type": "string",
       "label": "Application Name",
       "required": false,
-      "helpMarkDown": "Type the name of the application to select or create the target environment. \nA new Application will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage applications in order to automatically create new applications.",
+      "helpMarkDown": "Type the name of the application to select or create the target environment.",
       "visibleRule": "targetEnvironmentAutoCreate == true",
       "groupName": "target"
     },
@@ -107,7 +107,7 @@
       "type": "boolean",
       "label": "auto create (if not found)",
       "required": false,
-      "helpMarkDown": "Try to create the target environment with provided information if it does not exist yet in Apwide Golive.",
+      "helpMarkDown": "Create the target application with provided name if it does not exist yet in Apwide Golive.\nN.B. User associated to your connection must have permission to manage applications in order to automatically create new applications.",
       "properties": {
         "EditableOptions": "True"
       },
@@ -119,7 +119,7 @@
       "type": "string",
       "label": "Category Name",
       "required": false,
-      "helpMarkDown": "Type the name of the category to find/create the target environment. \nA new Category will be created if it does not exist yet. \nN.B. User associated to your connection must have permission to manage categories in order to automatically create new categories.",
+      "helpMarkDown": "Type the name of the category to find/create the target environment.",
       "visibleRule": "targetEnvironmentAutoCreate == true",
       "groupName": "target"
     },
@@ -140,7 +140,7 @@
       "type": "boolean",
       "label": "auto create (if not found)",
       "required": false,
-      "helpMarkDown": "Try to create the target environment with provided information if it does not exist yet in Apwide Golive.",
+      "helpMarkDown": "Create the target category with provided name if it does not exist yet in Apwide Golive.\nN.B. User associated to your connection must have permission to manage categories in order to automatically create new categories.",
       "properties": {
         "EditableOptions": "True"
       },
@@ -152,7 +152,7 @@
       "type": "string",
       "label": "Version Name",
       "required": false,
-      "helpMarkDown": "Deployed version",
+      "helpMarkDown": "Deployed version name",
       "groupName": "deployment"
     },
     {
@@ -160,7 +160,7 @@
       "type": "string",
       "label": "Build Number",
       "required": false,
-      "helpMarkDown": "Build number. Ex: $(Build.BuildNumber)",
+      "helpMarkDown": "Build number of the deployed version. Ex: $(Build.BuildNumber)",
       "groupName": "deployment"
     },
     {
@@ -176,45 +176,12 @@
       "type": "multiline",
       "label": "Description",
       "required": false,
-      "helpMarkDown": "Description of the deployment (basic html tags supported). Ex: \n✅ Job #$(Build.BuildId) - $(Build.DefinitionName)\nRequested by: $(Build.RequestedFor) \nBranch: $(Build.SourceBranchName)",
+      "helpMarkDown": "Description of the deployment (markdown is supported). Ex: \n✅ **Job** #$(Build.BuildId) - $(Build.DefinitionName)\nRequested by: $(Build.RequestedFor) \nBranch: $(Build.SourceBranchName)",
       "properties": {
         "resizable": "true",
         "rows": "10",
         "maxLength": "2000"
       },
-      "groupName": "deployment"
-    },
-    {
-      "name": "deploymentAddDoneIssuesFixedInVersion",
-      "type": "boolean",
-      "label": "Link Done Issues",
-      "required": false,
-      "helpMarkDown": "Include issues in a \"Done\" state to the deployment.",
-      "groupName": "deployment"
-    },
-    {
-      "name": "deploymentIssueKeys",
-      "type": "string",
-      "label": "Jira Issue Keys",
-      "required": false,
-      "helpMarkDown": "Comma separated list of Jira Issue Keys that are deployed. Ex: ECOM-3412,ECOM-6783,PAY-98",
-      "groupName": "deployment"
-    },
-    {
-      "name": "deploymentIssueKeysFromCommitHistory",
-      "type": "boolean",
-      "defaultValue": false,
-      "label": "Jira Issue Keys from Commit History",
-      "required": false,
-      "helpMarkDown": "Automatically parse and retrieve the Jira issue keys from commit history to set them as deployed.",
-      "groupName": "deployment"
-    },
-    {
-      "name": "deploymentJql",
-      "type": "string",
-      "label": "Jira JQL",
-      "required": false,
-      "helpMarkDown": "JQL filter used to retrieve Jira Issue Keys included in the deployment. Ex: project = ECP AND type in (Story, Bug)",
       "groupName": "deployment"
     },
     {
@@ -231,19 +198,52 @@
       "groupName": "deployment"
     },
     {
+      "name": "deploymentIssueKeys",
+      "type": "string",
+      "label": "Jira Issue Keys",
+      "required": false,
+      "helpMarkDown": "Comma separated list of Jira issue keys that are deployed. Ex: ECOM-3412,ECOM-6783,PAY-98",
+      "groupName": "deployment"
+    },
+    {
+      "name": "deploymentIssueKeysFromCommitHistory",
+      "type": "boolean",
+      "defaultValue": false,
+      "label": "Extract Jira Issue Keys from commits",
+      "required": false,
+      "helpMarkDown": "Parse and retrieve the Jira issue keys found in commit history and add them to the current deployment.",
+      "groupName": "deployment"
+    },
+    {
+      "name": "deploymentIssuesFromJql",
+      "type": "string",
+      "label": "Jira Issues from JQL",
+      "required": false,
+      "helpMarkDown": "Set the JQL query used to retrieve and add Jira tickets to the current deployment. \nEx: project = ECP AND type in (Story, Bug) AND resolution in (Fixed).\nMore about JQL [here](https://www.atlassian.com/software/jira/guides/jql)",
+      "groupName": "deployment"
+    },
+    {
+      "name": "deploymentAddDoneIssuesOfJiraVersion",
+      "type": "boolean",
+      "label": "Add \"Done\" Issues already in Version",
+      "required": false,
+      "helpMarkDown": "Add all \"Done\" issues fixed in the deployed Jira version to the current deployment",
+      "groupName": "deployment"
+    },
+    {
       "name": "deploymentNoFixVersionUpdate",
       "type": "boolean",
-      "label": "Prevent Fix Version Update",
+      "label": "Do not change \"Fix versions\" of Issues",
       "required": false,
-      "helpMarkDown": "Prevent updating deployment issues fix version field.",
+      "helpMarkDown": "Do not add the deployed Jira version to \"Fix versions\" of the deployed Jira issues.",
       "groupName": "deployment"
     },
     {
       "name": "deploymentSendJiraNotification",
       "type": "boolean",
-      "label": "Notify",
+      "label": "Send Jira Notifications",
       "required": false,
-      "helpMarkDown": "Trigger a Jira notification for issues updated with a fix version.",
+      "helpMarkDown": "Trigger the standard Jira notification when updating the \"Fix versions\" of the deployed issues.",
       "visibleRule": "deploymentNoFixVersionUpdate != true",
       "groupName": "deployment"
     },
