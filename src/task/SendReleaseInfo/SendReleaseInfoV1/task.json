@@ -85,7 +85,7 @@
       "type": "string",
       "label": "Start Date",
       "required": false,
-      "helpMarkDown": "Date in ISO-8601 format. Ex: 2023-09-24T12:00:00Z",
+      "helpMarkDown": "Will be set to current date by default. Date in ISO-8601 format. Ex: 2023-09-24T12:00:00Z",
       "groupName": "version"
     },
     {
@@ -93,7 +93,7 @@
       "type": "string",
       "label": "Release Date",
       "required": false,
-      "helpMarkDown": "Date in ISO-8601 format. Ex: 2023-10-24T12:00:00Z",
+      "helpMarkDown": "Will be set to current date if the version is marked as \"Released\". Date in ISO-8601 format. Ex: 2023-10-24T12:00:00Z",
       "groupName": "version"
     },
     {
@@ -101,7 +101,7 @@
       "type": "boolean",
       "label": "Released",
       "required": false,
-      "helpMarkDown": "Mark the current Jira version as released.",
+      "helpMarkDown": "Mark the current Jira version as released. The \"Release Date\" will be automatically set to current date if not explicitly specified.",
       "groupName": "version"
     },
     {
