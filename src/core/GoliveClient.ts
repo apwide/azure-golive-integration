@@ -248,7 +248,7 @@ export class GoliveClient {
   }
 
   async sendReleaseInfo(info: ReleaseInformationRequest): Promise<ReleaseInformationResponse> {
-    return this.golive('/application/release', {
+    return this.golive('/version', {
       method: 'POST',
       body: JSON.stringify(removeUndefined(info))
     })
