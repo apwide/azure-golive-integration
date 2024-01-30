@@ -11,7 +11,7 @@ export async function extractIssueKeysFromCommits() {
   const toCommitId = tl.getVariable('Build.SourceVersion')
   const fromCommitId = lastSuccessfulBuild?.sourceVersion || toCommitId
   const commits = await azureClient.getCommits(fromCommitId, toCommitId)
-  log(`${commits.length} commits found`)
+  log(`${commits.length} commits found for commits ${fromCommitId}..${toCommitId}`)
   const issueKeys = unique(commits.flatMap((commit) => extractIssueKeys(commit.comment)))
   log(`Issue keys found in commits: ${issueKeys}`)
   return issueKeys

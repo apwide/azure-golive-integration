@@ -5,6 +5,7 @@ import { IBuildApi } from 'azure-devops-node-api/BuildApi'
 import { IGitApi } from 'azure-devops-node-api/GitApi'
 import { Build, BuildQueryOrder, BuildResult } from 'azure-devops-node-api/interfaces/BuildInterfaces'
 import { GitVersionDescriptor, GitVersionType } from 'azure-devops-node-api/interfaces/GitInterfaces'
+import { log } from './utils'
 
 function isSuccessful(result: BuildResult): boolean {
   return result === BuildResult.Succeeded || result === BuildResult.PartiallySucceeded
@@ -85,8 +86,9 @@ export class AzureClient {
 
   async getCommits(fromCommitId: string, toCommitId: string) {
     const repositoryId = tl.getVariable('Build.Repository.Id')
+    log(`Search commits in repository id ${repositoryId} for ${fromCommitId}..${toCommitId}`)
     if (fromCommitId === toCommitId) {
-      return this.gitApi.getCommits(repositoryId, { fromCommitId, toCommitId })
+      return (await this.gitApi.getCommits(repositoryId, { fromCommitId, toCommitId })) || []
     } else {
       const itemVersion: GitVersionDescriptor = {
         version: fromCommitId,
@@ -96,7 +98,7 @@ export class AzureClient {
         version: toCommitId,
         versionType: GitVersionType.Commit
       }
-      return this.gitApi.getCommits(repositoryId, { itemVersion, compareVersion })
+      return (await this.gitApi.getCommits(repositoryId, { itemVersion, compareVersion })) || []
     }
   }
 }
