@@ -69,8 +69,20 @@ If your pipeline is performing deployments, you can send the information of the 
 
 Check the help information of each option in order to understand how to use it.
 
-For example, the "Extract Jira Issue Keys from commits" option enables the parsing of commit messages to identify the issue keys that should be added to the deployment.
-The task will go through all commits made from the current job to the last successful job.
+For the "Extract Jira Issue Keys from commits" option enables the parsing of commit messages to identify the issue keys that should be added to the deployment.
+
+The task employs several strategies to extract issue keys from a build:
+* It traverses the messages of all changes that are part of a build. By default, Azure returns all changes since the last successful build, and consequently,
+  Golive will iterate through all of these. However, Azure truncates messages, and only the first commit line will be analyzed.
+* It queries the Azure Git Rest API to retrieve all commits since the last successful build. This only works for Git repositories hosted on Azure.
+* It traverses commits using the git CLI from the agent image. By default, when no checkout step is specified, [Azure performs a shallow checkout](https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/steps-checkout?view=azure-pipelines#shallow-fetch), 
+  and the history is not available. To make it available, it is necessary to define a checkout step with a depth of 0:
+
+```yaml
+steps:
+  - checkout: self
+    fetchDepth: 0
+```
 
 There are plenty of other options available that will drastically help you automate routines to simplify your pipelines.
 

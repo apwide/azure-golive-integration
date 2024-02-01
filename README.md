@@ -35,3 +35,7 @@ This repository contains source code, documentation and scripts required to buil
 * do not forget to set the environment variables correctly
 * updates of some common resources may conflict when both "DEV" and "PROD" versions of the extension are installed to the same Azure DevOps organization
 * multiple versions of same task: https://stackoverflow.com/questions/43789135/tfs-custom-build-tasks-multiple-versions
+
+## Tips
+
+Test *tf* CLI on linux (https://github.com/microsoft/team-explorer-everywhere)

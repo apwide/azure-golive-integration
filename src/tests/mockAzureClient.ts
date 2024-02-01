@@ -1,22 +1,22 @@
 import { GitCommitRef } from 'azure-devops-node-api/interfaces/GitInterfaces'
-import { Build } from 'azure-devops-node-api/interfaces/BuildInterfaces'
+import { Build, Change } from 'azure-devops-node-api/interfaces/BuildInterfaces'
+import { Builds } from '../core/Builds'
 
-export function mockAzureClient({
-  lastSuccessfulBuild,
-  oldestFailedBuild,
-  commits
-}: { oldestFailedBuild?: Build; lastSuccessfulBuild?: Build; commits?: GitCommitRef[] } = {}) {
+export function mockAzureClient({ builds, commits, changes }: { builds?: Build[]; commits?: GitCommitRef[]; changes?: Change[] } = {}) {
   return {
     getAzureClient() {
       return {
-        async getLastSuccessfulBuildDifferentThan() {
-          return lastSuccessfulBuild || null
-        },
-        async getOldestFailedBuildDifferentThan() {
-          return oldestFailedBuild || null
+        async getBuilds() {
+          return new Builds(builds || [])
         },
         async getCommits() {
           return commits || []
+        },
+        async getChanges() {
+          return changes || []
+        },
+        async getChangesBetween() {
+          return changes || []
         }
       }
     }

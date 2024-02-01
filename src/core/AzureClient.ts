@@ -6,10 +6,7 @@ import { IGitApi } from 'azure-devops-node-api/GitApi'
 import { Build, BuildQueryOrder, BuildResult } from 'azure-devops-node-api/interfaces/BuildInterfaces'
 import { GitVersionDescriptor, GitVersionType } from 'azure-devops-node-api/interfaces/GitInterfaces'
 import { log } from './utils'
-
-function isSuccessful(result: BuildResult): boolean {
-  return result === BuildResult.Succeeded || result === BuildResult.PartiallySucceeded
-}
+import { Builds } from './Builds'
 
 export class AzureClient {
   private readonly buildApi: IBuildApi
@@ -24,35 +21,11 @@ export class AzureClient {
     this.definitionId = definitionId
   }
 
-  async getLastSuccessfulBuildDifferentThan(buildId: number): Promise<Build | null> {
-    const builds = await this.getBuilds()
-    // builds.forEach((build) => {
-    //   log(`build ${build.id}-${build.buildNumber} finished on ${build.finishTime} resulted in ${build.result}`)
-    // })
-
-    return builds.find(({ id, result }) => id !== buildId && isSuccessful(result)) || null
+  async getBuilds(): Promise<Builds> {
+    return new Builds(await this.loadBuilds())
   }
 
-  async getOldestFailedBuildDifferentThan(buildId: number): Promise<Build | null> {
-    const builds = await this.getBuilds()
-    // builds.forEach((build) => {
-    //   log(`build ${build.id}-${build.buildNumber} finished on ${build.finishTime} resulted in ${build.result}`)
-    // })
-
-    let oldestFailedBuild: Build | undefined = undefined
-    for (const build of builds) {
-      if (build.id === buildId) {
-        continue
-      }
-      if (build.result === BuildResult.Succeeded || build.result === BuildResult.PartiallySucceeded) {
-        break
-      }
-      oldestFailedBuild = build
-    }
-    return oldestFailedBuild || null
-  }
-
-  async getBuilds() {
+  private async loadBuilds() {
     // const definition = await buildApi.getDefinition(projectId, definitionId)
     // const builds = await buildApi.getBuilds(projectId, [definition.id])
     return this.buildApi.getBuilds(
@@ -74,6 +47,10 @@ export class AzureClient {
       undefined,
       BuildQueryOrder.FinishTimeDescending
     )
+  }
+
+  async getChanges(buildId: number) {
+    return this.buildApi.getBuildChanges(this.projectId, buildId)
   }
 
   async getChangesBetween(fromBuildId: number, toBuildId: number) {
