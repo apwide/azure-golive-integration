@@ -39,3 +39,9 @@ This repository contains source code, documentation and scripts required to buil
 ## Tips
 
 Test *tf* CLI on linux (https://github.com/microsoft/team-explorer-everywhere)
+
+## Documentation
+
+* [Release Variables](https://learn.microsoft.com/en-us/azure/devops/pipelines/release/variables?view=azure-devops&tabs=batch)
+* [Predefined Variables](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml)
+* [Rest API](https://learn.microsoft.com/en-us/rest/api/azure/devops/account/?view=azure-devops-rest-7.1)
