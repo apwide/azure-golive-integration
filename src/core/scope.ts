@@ -13,6 +13,7 @@ export async function extractIssueKeysFromCommits() {
   const toCommitId = tl.getVariable('Build.SourceVersion')
   const fromCommitId = lastSuccessfulBuild?.sourceVersion || toCommitId
   const issueKeys = unique([
+    ...(await extractFromRelease(azureClient)),
     ...(await extractIssueKeysFromGitApi(azureClient, fromCommitId, toCommitId)),
     ...(await extractIssueKeysFromBuildChanges(azureClient, fromBuildId)),
     ...extractIssueKeysFromCli(fromCommitId, toCommitId)
@@ -20,6 +21,20 @@ export async function extractIssueKeysFromCommits() {
   ])
   log(`Total Issue keys found in commits: ${issueKeys}`)
   return issueKeys
+}
+
+async function extractFromRelease(azureClient: AzureClient) {
+  try {
+    log(`Extract Issue keys from release changes`)
+    const releaseId = parseInt(tl.getVariable('Release.ReleaseId'))
+    const changes = await azureClient.getChangesFromRelease(releaseId)
+    const issueKeys = extractIssueKeys(changes.join(' '))
+    log(`Issue keys found from releases: ${issueKeys}`)
+    return issueKeys
+  } catch (error) {
+    log(`Not able to get release info ${error}`)
+    return []
+  }
 }
 
 // function extractIssueKeysFromTfvc(fromCommitId: string, toCommitId: string) {

@@ -3,20 +3,24 @@ import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBase
 import { getHandlerFromToken, WebApi } from 'azure-devops-node-api'
 import { IBuildApi } from 'azure-devops-node-api/BuildApi'
 import { IGitApi } from 'azure-devops-node-api/GitApi'
-import { Build, BuildQueryOrder, BuildResult } from 'azure-devops-node-api/interfaces/BuildInterfaces'
+import { BuildQueryOrder, Change } from 'azure-devops-node-api/interfaces/BuildInterfaces'
 import { GitVersionDescriptor, GitVersionType } from 'azure-devops-node-api/interfaces/GitInterfaces'
 import { log } from './utils'
 import { Builds } from './Builds'
+import { IReleaseApi } from 'azure-devops-node-api/ReleaseApi'
+import { Release, ReleaseStatus, ReleaseWorkItemRef } from 'azure-devops-node-api/interfaces/ReleaseInterfaces'
 
 export class AzureClient {
   private readonly buildApi: IBuildApi
   private readonly gitApi: IGitApi
+  private readonly releaseApi: IReleaseApi
   private readonly projectId: string
   private readonly definitionId: number
 
-  constructor(buildApi: IBuildApi, gitApi: IGitApi, projectId: string, definitionId: number) {
+  constructor(buildApi: IBuildApi, gitApi: IGitApi, releaseApi: IReleaseApi, projectId: string, definitionId: number) {
     this.buildApi = buildApi
     this.gitApi = gitApi
+    this.releaseApi = releaseApi
     this.projectId = projectId
     this.definitionId = definitionId
   }
@@ -53,6 +57,42 @@ export class AzureClient {
     return this.buildApi.getBuildChanges(this.projectId, buildId)
   }
 
+  async getChangesFromRelease(releaseId: number) {
+    const release = await this.releaseApi.getRelease(this.projectId, releaseId)
+    let previousRelease: Release
+    if (release.releaseDefinition?.id) {
+      const activeReleases =
+        (await this.releaseApi.getReleases(this.projectId, release.releaseDefinition?.id, undefined, undefined, undefined, ReleaseStatus.Active)) || []
+      previousRelease = activeReleases.find((activeRelease) => activeRelease.id < release.id) || undefined
+    }
+
+    log(`release loaded for ${releaseId}`, release)
+    const changeMessages: string[] = [release.comment]
+
+    await Promise.all(
+      (release.artifacts || []).map(async (artifact) => {
+        try {
+          log(`try to get release work item for artifact ${artifact.alias}`)
+          // eslint-disable-next-line max-len
+          const artifactWorkItems =
+            (await this.releaseApi.getReleaseWorkItemsRefs(this.projectId, releaseId, previousRelease?.id, undefined, artifact.alias)) || []
+          changeMessages.push(...artifactWorkItems.map((workItem) => workItem.title))
+        } catch (error) {
+          log(`not able to load release work items due to: ${error}`)
+        }
+        try {
+          log(`try to get release changes for artifact ${artifact.alias}`)
+          const artifactChanges = (await this.releaseApi.getReleaseChanges(this.projectId, releaseId, previousRelease?.id, undefined, artifact.alias)) || []
+          changeMessages.push(...artifactChanges.map((change) => change.message))
+        } catch (error) {
+          log(`not able to load release changes due to: ${error}`)
+        }
+      })
+    )
+
+    return changeMessages.filter((m) => Boolean(m))
+  }
+
   async getChangesBetween(fromBuildId: number, toBuildId: number) {
     // const changes = await buildApi.getBuildChanges(projectId, fromBuildId, undefined, undefined, true)
     // changes.forEach((change) => {
@@ -87,7 +127,8 @@ export async function getAzureClient() {
   const webApi: WebApi = new WebApi(endpointUrl, credentialHandler)
   const buildApi = await webApi.getBuildApi()
   const gitApi = await webApi.getGitApi()
+  const releaseApi = await webApi.getReleaseApi()
   const projectId = tl.getVariable('System.TeamProjectId')
   const definitionId = parseInt(tl.getVariable('System.DefinitionId'))
-  return new AzureClient(buildApi, gitApi, projectId, definitionId)
+  return new AzureClient(buildApi, gitApi, releaseApi, projectId, definitionId)
 }

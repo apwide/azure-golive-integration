@@ -75,6 +75,9 @@ The task employs several strategies to extract issue keys from a build:
 * It traverses the messages of all changes that are part of a build. By default, Azure returns all changes since the last successful build, and consequently,
   Golive will iterate through all of these. However, Azure truncates messages, and only the first commit line will be analyzed.
 * It queries the Azure Git Rest API to retrieve all commits since the last successful build. This only works for Git repositories hosted on Azure.
+* It queries the Azure Release API to retrieve all commits from artifacts history since the previous release and attached working items. This only works for Release pipelines.
+To make available artifacts history, depending on its type (eg: github, bitbucket..:), you have to grant permission to the pipeline user (usually: "Project ${projectName} Build Services (${organizationName})")
+to use the Service Connection of the artifact. [Service Connection Security Documentation](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#secure-a-service-connection)
 * It traverses commits using the git CLI from the agent image. By default, when no checkout step is specified, [Azure performs a shallow checkout](https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/steps-checkout?view=azure-pipelines#shallow-fetch), 
   and the history is not available. To make it available, it is necessary to define a checkout step with a depth of 0:
 
