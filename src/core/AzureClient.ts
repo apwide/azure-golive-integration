@@ -5,7 +5,7 @@ import { IBuildApi } from 'azure-devops-node-api/BuildApi'
 import { IGitApi } from 'azure-devops-node-api/GitApi'
 import { BuildQueryOrder, Change } from 'azure-devops-node-api/interfaces/BuildInterfaces'
 import { GitVersionDescriptor, GitVersionType } from 'azure-devops-node-api/interfaces/GitInterfaces'
-import { log } from './utils'
+import { debug, log } from './utils'
 import { Builds } from './Builds'
 import { IReleaseApi } from 'azure-devops-node-api/ReleaseApi'
 import { Release, ReleaseStatus, ReleaseWorkItemRef } from 'azure-devops-node-api/interfaces/ReleaseInterfaces'
@@ -66,7 +66,7 @@ export class AzureClient {
       previousRelease = activeReleases.find((activeRelease) => activeRelease.id < release.id) || undefined
     }
 
-    log(`release loaded for ${releaseId}`, release)
+    debug(`release loaded for ${releaseId} : ${release}`)
     const changeMessages: string[] = [release.comment]
 
     await Promise.all(
@@ -78,14 +78,14 @@ export class AzureClient {
             (await this.releaseApi.getReleaseWorkItemsRefs(this.projectId, releaseId, previousRelease?.id, undefined, artifact.alias)) || []
           changeMessages.push(...artifactWorkItems.map((workItem) => workItem.title))
         } catch (error) {
-          log(`not able to load release work items due to: ${error}`)
+          log(`not able to load release work items for artifact ${artifact.alias} of type ${artifact.type} from source ${artifact.sourceId} due to: ${error}`)
         }
         try {
           log(`try to get release changes for artifact ${artifact.alias}`)
           const artifactChanges = (await this.releaseApi.getReleaseChanges(this.projectId, releaseId, previousRelease?.id, undefined, artifact.alias)) || []
           changeMessages.push(...artifactChanges.map((change) => change.message))
         } catch (error) {
-          log(`not able to load release changes due to: ${error}`)
+          log(`not able to load release changes for artifact ${artifact.alias} of type ${artifact.type} from source ${artifact.sourceId} due to: ${error}`)
         }
       })
     )
