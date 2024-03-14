@@ -8,7 +8,11 @@ import { GitVersionDescriptor, GitVersionType } from 'azure-devops-node-api/inte
 import { debug, log } from './utils'
 import { Builds } from './Builds'
 import { IReleaseApi } from 'azure-devops-node-api/ReleaseApi'
-import { Release, ReleaseStatus, ReleaseWorkItemRef } from 'azure-devops-node-api/interfaces/ReleaseInterfaces'
+import { Artifact, Release, ReleaseStatus, ReleaseWorkItemRef } from 'azure-devops-node-api/interfaces/ReleaseInterfaces'
+
+function artifactLogInfo({ alias, type, sourceId }: Artifact): string {
+  return `artifact '${alias}' of type '${type}' from source '${sourceId}'`
+}
 
 export class AzureClient {
   private readonly buildApi: IBuildApi
@@ -69,23 +73,26 @@ export class AzureClient {
     debug(`release loaded for ${releaseId} : ${release}`)
     const changeMessages: string[] = [release.comment]
 
+    log(`Search messages in artifacts work items and changes happened between release ${releaseId} and previous active release id ${previousRelease?.id} `)
     await Promise.all(
       (release.artifacts || []).map(async (artifact) => {
         try {
-          log(`try to get release work item for artifact ${artifact.alias}`)
+          debug(`loading release work items for '${artifactLogInfo(artifact)}'`)
           // eslint-disable-next-line max-len
           const artifactWorkItems =
             (await this.releaseApi.getReleaseWorkItemsRefs(this.projectId, releaseId, previousRelease?.id, undefined, artifact.alias)) || []
           changeMessages.push(...artifactWorkItems.map((workItem) => workItem.title))
+          debug(`found ${artifactWorkItems.length} release work items for '${artifactLogInfo(artifact)}'`)
         } catch (error) {
-          log(`not able to load release work items for artifact ${artifact.alias} of type ${artifact.type} from source ${artifact.sourceId} due to: ${error}`)
+          log(`not able to load release work items for '${artifactLogInfo(artifact)}' due to: ${error}`)
         }
         try {
-          log(`try to get release changes for artifact ${artifact.alias}`)
+          debug(`loading release changes messages for '${artifactLogInfo(artifact)}'`)
           const artifactChanges = (await this.releaseApi.getReleaseChanges(this.projectId, releaseId, previousRelease?.id, undefined, artifact.alias)) || []
           changeMessages.push(...artifactChanges.map((change) => change.message))
+          debug(`found ${artifactChanges.length} release changes for '${artifactLogInfo(artifact)}'`)
         } catch (error) {
-          log(`not able to load release changes for artifact ${artifact.alias} of type ${artifact.type} from source ${artifact.sourceId} due to: ${error}`)
+          log(`not able to load release changes for '${artifactLogInfo(artifact)}' due to: ${error}`)
         }
       })
     )
