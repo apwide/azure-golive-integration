@@ -27,7 +27,8 @@ async function extractFromRelease(azureClient: AzureClient) {
   try {
     log(`Extract Issue keys from release changes`)
     const releaseId = parseInt(tl.getVariable('Release.ReleaseId'))
-    const changes = await azureClient.getChangesFromRelease(releaseId)
+    const stageId = parseInt(tl.getVariable('Release.DefinitionEnvironmentId'))
+    const changes = await azureClient.getChangesFromRelease(releaseId, stageId)
     const issueKeys = extractIssueKeys(changes.join(' '))
     log(`Issue keys found from releases: ${issueKeys}`)
     return issueKeys

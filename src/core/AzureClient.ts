@@ -3,12 +3,12 @@ import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBase
 import { getHandlerFromToken, WebApi } from 'azure-devops-node-api'
 import { IBuildApi } from 'azure-devops-node-api/BuildApi'
 import { IGitApi } from 'azure-devops-node-api/GitApi'
-import { BuildQueryOrder, Change } from 'azure-devops-node-api/interfaces/BuildInterfaces'
+import { BuildQueryOrder } from 'azure-devops-node-api/interfaces/BuildInterfaces'
 import { GitVersionDescriptor, GitVersionType } from 'azure-devops-node-api/interfaces/GitInterfaces'
 import { debug, log } from './utils'
 import { Builds } from './Builds'
 import { IReleaseApi } from 'azure-devops-node-api/ReleaseApi'
-import { Artifact, Release, ReleaseStatus, ReleaseWorkItemRef } from 'azure-devops-node-api/interfaces/ReleaseInterfaces'
+import { Artifact, DeploymentStatus, ReleaseQueryOrder, ReleaseStatus } from 'azure-devops-node-api/interfaces/ReleaseInterfaces'
 
 function artifactLogInfo({ alias, type, sourceId }: Artifact): string {
   return `artifact '${alias}' of type '${type}' from source '${sourceId}'`
@@ -61,26 +61,75 @@ export class AzureClient {
     return this.buildApi.getBuildChanges(this.projectId, buildId)
   }
 
-  async getChangesFromRelease(releaseId: number) {
+  async getChangesFromRelease(releaseId: number, definitionEnvironmentId: number) {
     const release = await this.releaseApi.getRelease(this.projectId, releaseId)
-    let previousRelease: Release
+    let previousReleaseId: number
     if (release.releaseDefinition?.id) {
-      const activeReleases =
-        (await this.releaseApi.getReleases(this.projectId, release.releaseDefinition?.id, undefined, undefined, undefined, ReleaseStatus.Active)) || []
-      previousRelease = activeReleases.find((activeRelease) => activeRelease.id < release.id) || undefined
+      if (definitionEnvironmentId) {
+        debug(`definitionEnvironmentId set to ${definitionEnvironmentId}, try to find previous release by previous successful deployment for it.`)
+        // eslint-disable-next-line max-len
+        const deployments = await this.releaseApi.getDeployments(
+          this.projectId,
+          release.releaseDefinition.id,
+          definitionEnvironmentId,
+          null,
+          null,
+          null,
+          DeploymentStatus.Succeeded
+        )
+        debug(`found ${deployments.length} deployments for definitionEnvironmentId ${definitionEnvironmentId} in release ${release.releaseDefinition?.id}`)
+        if (deployments.length > 0) {
+          const lastSuccessfulDeployment = deployments[0]
+          previousReleaseId = deployments[0].release?.id
+          debug(`found previous successful deployment id ${lastSuccessfulDeployment.id} linked to release id ${previousReleaseId}`)
+        } else {
+          debug(`no deployments found, try to take oldest release`)
+          const oldestReleases = await this.releaseApi.getReleases(
+            this.projectId,
+            release.releaseDefinition?.id,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            ReleaseQueryOrder.Ascending,
+            1
+          )
+          previousReleaseId = oldestReleases[0]?.id
+        }
+      }
+      if (!previousReleaseId) {
+        debug(`loading releases for release definition ${release.releaseDefinition.id} and stage id ${definitionEnvironmentId}`)
+        const activeReleases =
+          (await this.releaseApi.getReleases(
+            this.projectId,
+            release.releaseDefinition.id,
+            definitionEnvironmentId,
+            undefined,
+            undefined,
+            ReleaseStatus.Active
+          )) || []
+
+        const previousRelease = activeReleases.find((activeRelease) => activeRelease.id < release.id) || undefined
+        if (previousRelease) {
+          previousReleaseId = previousRelease.id
+        }
+      }
     }
 
     debug(`release loaded for ${releaseId} : ${release}`)
     const changeMessages: string[] = [release.comment]
 
-    log(`Search messages in artifacts work items and changes happened between release ${releaseId} and previous active release id ${previousRelease?.id} `)
+    log(`Search messages in artifacts work items and changes happened between release ${releaseId} and previous active release id ${previousReleaseId} `)
     await Promise.all(
       (release.artifacts || []).map(async (artifact) => {
         try {
           debug(`loading release work items for '${artifactLogInfo(artifact)}'`)
           // eslint-disable-next-line max-len
           const artifactWorkItems =
-            (await this.releaseApi.getReleaseWorkItemsRefs(this.projectId, releaseId, previousRelease?.id, undefined, artifact.alias)) || []
+            (await this.releaseApi.getReleaseWorkItemsRefs(this.projectId, releaseId, previousReleaseId, undefined, artifact.alias)) || []
           changeMessages.push(...artifactWorkItems.map((workItem) => workItem.title))
           debug(`found ${artifactWorkItems.length} release work items for '${artifactLogInfo(artifact)}'`)
         } catch (error) {
@@ -88,7 +137,7 @@ export class AzureClient {
         }
         try {
           debug(`loading release changes messages for '${artifactLogInfo(artifact)}'`)
-          const artifactChanges = (await this.releaseApi.getReleaseChanges(this.projectId, releaseId, previousRelease?.id, undefined, artifact.alias)) || []
+          const artifactChanges = (await this.releaseApi.getReleaseChanges(this.projectId, releaseId, previousReleaseId, undefined, artifact.alias)) || []
           changeMessages.push(...artifactChanges.map((change) => change.message))
           debug(`found ${artifactChanges.length} release changes for '${artifactLogInfo(artifact)}'`)
         } catch (error) {
