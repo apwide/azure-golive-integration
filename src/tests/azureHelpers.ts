@@ -2,12 +2,11 @@ import * as ttm from 'azure-pipelines-task-lib/mock-test'
 import * as assert from 'assert'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-function runTest(test: string, done: Mocha.Done, validate: (t: ttm.MockTestRunner) => void = () => {}) {
+async function runTest(test: string, validate: (t: ttm.MockTestRunner) => void = () => {}) {
   const mtr: ttm.MockTestRunner = new ttm.MockTestRunner(test)
   try {
-    mtr.run()
+    await mtr.runAsync()
     validate(mtr)
-    done()
   } catch (error) {
     console.log(mtr.stdout)
     console.log(mtr.stderr)

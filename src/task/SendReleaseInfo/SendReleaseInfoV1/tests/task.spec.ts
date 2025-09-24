@@ -16,8 +16,8 @@ describe('Send Release Infos Test Suite', () => {
     // do nothing
   })
 
-  it('should send release information', (done: Mocha.Done) => {
-    runTest(test('withAll.js'), done, (tr) => {
+  it('should send release information', () => {
+    return runTest(test('withAll.js'), (tr) => {
       assert.equal(tr.succeeded, true)
       assert.equal(tr.errorIssues.length, 0)
       assertInConsole(tr, '2023-01-24T12:10:00Z')
@@ -29,8 +29,8 @@ describe('Send Release Infos Test Suite', () => {
     })
   })
 
-  it('should detect when no target application', (done: Mocha.Done) => {
-    runTest(test('withMissingTargetApp'), done, (tr) => {
+  it('should detect when no target application', () => {
+    return runTest(test('withMissingTargetApp'), (tr) => {
       assert.equal(tr.succeeded, false)
       assertContains(tr.errorIssues, 'At least one of applicationId/applicationName must be provided')
     })

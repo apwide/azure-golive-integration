@@ -16,7 +16,7 @@
     "Minor": "{{minor}}",
     "Patch": "{{patch}}"
   },
-  "minimumAgentVersion": "2.144.0",
+  "minimumAgentVersion": "2.209.0",
   "instanceNameFormat": "Service Endpoint Build Task $(project)",
   "groups": [
     {

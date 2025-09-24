@@ -1,10 +1,10 @@
 {
   "scripts": {
-    "build": "tsc && npm run lint && npm run test && webpack --config=webpack.config.js --env ${BUILD_ENV}",
-    "build:package": "npm run build && npm run package",
+    "build": "tsc && run-s lint test && webpack --config=webpack.config.js --env ${BUILD_ENV}",
+    "build:package": "run-s build package",
     "clean": "rimraf ./dist && rimraf ./build",
-    "clean:build": "npm run clean && npm run build",
-    "lint": "npm run lint:eslint && npm run lint:format",
+    "clean:build": "run-s clean build",
+    "lint": "run-s lint:eslint lint:format",
     "lint:eslint": "eslint -c .eslintrc.js --ext .ts src",
     "lint:fix": "npm run lint --fix",
     "lint:format": "prettier --check src",
@@ -17,16 +17,16 @@
     "do:clean:task": "tfx build tasks delete --task-id ${TASK_ID} --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} || true",
     "package": "tfx extension create --root dist --manifests base.json --output-path dist/${BUILD_ENV}.vsix --publisher ${DEV_PUBLISHER}",
     "publish": "tfx extension publish --vsix dist/${BUILD_ENV}.vsix --token ${ADO_PAT}",
-    "dev": "npm run build && npm run package && npm run publish && npm run publish:environment-info-1 && npm run publish:environment-info-2 && npm run publish:release-info",
+    "dev": "run-s build package publish publish:environment-info-1 publish:environment-info-2 publish:release-info",
     "publish:environment-info-1": "tfx build tasks upload --task-path dist/EnvironmentInfo/EnvironmentInfoV1 --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
-    "dev:environment-info-1": "npm run build && npm run publish:environment-info-1",
-    "clean:publish:environment-info-1": "npm run clean:task && npm run publish:environment-info-1",
+    "dev:environment-info-1": "run-s build publish:environment-info-1",
+    "clean:publish:environment-info-1": "run-s clean:task publish:environment-info-1",
     "publish:environment-info-2": "tfx build tasks upload --task-path dist/EnvironmentInfo/EnvironmentInfoV2 --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
-    "dev:environment-info-2": "npm run build && npm run publish:environment-info-2",
-    "clean:publish:environment-info-2": "npm run clean:task && npm run publish:environment-info-2",
+    "dev:environment-info-2": "run-s build publish:environment-info-2",
+    "clean:publish:environment-info-2": "run-s clean:task publish:environment-info-2",
     "publish:release-info": "tfx build tasks upload --task-path dist/SendReleaseInfo/SendReleaseInfoV1 --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
-    "dev:release-info": "npm run build && npm run publish:release-info",
-    "clean:publish:release-info": "npm run clean:task && npm run publish:release-info"
+    "dev:release-info": "run-s build publish:release-info",
+    "clean:publish:release-info": "run-s clean:task publish:release-info"
   },
   "devDependencies": {
     "@types/mocha": "10.0.6",
@@ -57,8 +57,9 @@
   "private": true,
   "version": "0.11.0",
   "dependencies": {
-    "azure-devops-node-api": "12.4.0",
-    "azure-pipelines-task-lib": "4.9.0",
-    "node-fetch": "3.3.2"
+    "azure-devops-node-api": "15.1.1",
+    "azure-pipelines-task-lib": "4.13.0",
+    "node-fetch": "3.3.2",
+    "npm-run-all2": "^8.0.4"
   }
 }
