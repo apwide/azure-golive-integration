@@ -16,7 +16,7 @@
     "Minor": "{{minor}}",
     "Patch": "{{patch}}"
   },
-  "minimumAgentVersion": "1.95.0",
+  "minimumAgentVersion": "2.209.0",
   "instanceNameFormat": "Service Endpoint Build Task $(project)",
   "groups": [
     {
@@ -148,6 +148,10 @@
   ],
   "execution": {
     "Node16": {
+      "target": "main.js",
+      "argumentFormat": ""
+    },
+    "Node20_1": {
       "target": "main.js",
       "argumentFormat": ""
     }
