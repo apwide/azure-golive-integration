@@ -9,7 +9,7 @@
     "lint:fix": "npm run lint --fix",
     "lint:format": "prettier --check src",
     "fix:format": "prettier --write src",
-    "test": "mocha",
+    "test": "mocha --timeout 10000",
     "start": "node --no-deprecation dist/environment-info/main.js",
     "create:task": "node scripts/golive.js create:task",
     "do:create:task": "tfx build tasks create --task-id ${TASK_ID} --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} || true",

@@ -10,11 +10,11 @@ jobs:
     name: Build azure extension
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      name: Use Node.js 16.x
+    - uses: actions/checkout@v5
+    - uses: actions/setup-node@v5
+      name: Use Node.js 20.x
       with:
-        node-version: 16.x
+        node-version: 20
     - name: Build
       env:
         BUILD_ENV: production
@@ -27,7 +27,7 @@ jobs:
     if: "success() && !startsWith(github.event.head_commit.message, 'chore: version bump')"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - name: Bump
         uses: 'phips28/gh-action-bump-version@master'
         env:
@@ -36,10 +36,10 @@ jobs:
           major-wording: 'BREAKING'
           default: 'minor'
           commit-message: 'chore: version bump to {{version}}'
-      - uses: actions/setup-node@v3
-        name: Use Node.js 16.x
+      - uses: actions/setup-node@v5
+        name: Use Node.js 20.x
         with:
-          node-version: 16.x
+          node-version: 20
       - name: Build & Publish
         env:
           ADO_PAT: ${{ secrets.AZURE_CI_AOD_PAT }}
