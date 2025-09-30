@@ -15,7 +15,7 @@ This repository contains source code, documentation and scripts required to buil
     - `BUILD_ENV` = **development**
     - `ADO_PAT` - Your personal access token
     - `ADO_ACCOUNT_URI` - The default collection URI for your account *(eg. <https://dev.azure.com/{{name}})>*
-    - `DEV_PUBLISHER` - Id of your publisher account
+    - `DEV_PUBLISHER` - Id of your publisher account (eg: apwide)
 
 1. Run following commands to verify setup-
     1. `npm install` (Installs npm dependencies)
@@ -29,6 +29,14 @@ This repository contains source code, documentation and scripts required to buil
 | ------------- |:-------------------------:|:----- |
 | Task implementation | `npm run dev:{task-name}` | Build, package and update custom task without updating extension *(Faster)* |
 | Anything else |       `npm run dev`       | Build, package and publish full extension *(Slower)* |
+
+## Environment variables
+
+You can set your environment variables (eg: BUILD_ENV, ADO_PAT...) in an .env file and load it once for all in your session with:
+
+```shell
+export $(cat .env | xargs)
+```
 
 ## Known bugs & limitations
 * you will not be able to publish the extension to the marketplace between 00:00 and 01:00 (AM)

@@ -10,11 +10,11 @@ jobs:
     name: Build azure extension and publish in development if successful
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      name: Use Node.js 16.x
+    - uses: actions/checkout@v5
+    - uses: actions/setup-node@v5
+      name: Use Node.js 20.x
       with:
-        node-version: 16.x
+        node-version: 20
     - name: Build & Publish
       env:
         ADO_PAT: ${{ secrets.AZURE_CI_AOD_PAT }}
