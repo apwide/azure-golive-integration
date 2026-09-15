@@ -1,8 +1,8 @@
 import tl = require('azure-pipelines-task-lib/task')
 import { debug, toBase64 } from './utils'
 import fetch from 'node-fetch'
-import * as https from 'https'
 import { tokenHeaders } from './restUtils'
+import { createHttpsAgent } from './proxyUtils'
 
 function removeUndefined(payload: any): any {
   Object.keys(payload).forEach((key) => {
@@ -138,7 +138,7 @@ export class GoliveClient {
     const password = serverEndpointAuth.parameters.password
     const apiToken = serverEndpointAuth.parameters.apitoken
     const authenticationScheme = serverEndpointAuth.scheme
-    const agent = new https.Agent({ rejectUnauthorized: false })
+    const agent = createHttpsAgent(goliveBaseUrl)
     const headers: Record<string, string> = {
       'content-type': 'application/json',
       'accept': 'application/json',
