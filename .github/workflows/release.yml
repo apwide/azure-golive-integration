@@ -44,7 +44,7 @@ jobs:
         with:
           major-wording: 'BREAKING'
           default: 'minor'
-          commit-message: 'chore: version bump to {{version}}'
+          commit-message: 'chore: version bump to {{version}} [skip ci]'
       - uses: actions/setup-node@v5
         name: Use Node.js 20.x
         with:
