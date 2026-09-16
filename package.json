@@ -16,7 +16,7 @@
     "clean:task": "node scripts/golive.js clean:task",
     "do:clean:task": "tfx build tasks delete --task-id ${TASK_ID} --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} || true",
     "package": "tfx extension create --root dist --manifests base.json --output-path dist/${BUILD_ENV}.vsix --publisher ${DEV_PUBLISHER}",
-    "publish": "tfx extension publish --vsix dist/${BUILD_ENV}.vsix --token ${ADO_PAT}",
+    "publish": "tfx extension publish --vsix dist/${BUILD_ENV}.vsix --token ${ADO_PAT} --no-wait-validation",
     "dev": "run-s build package publish publish:environment-info-1 publish:environment-info-2 publish:release-info",
     "publish:environment-info-1": "tfx build tasks upload --task-path dist/EnvironmentInfo/EnvironmentInfoV1 --overwrite --token ${ADO_PAT} --service-url ${ADO_ACCOUNT_URI} ",
     "dev:environment-info-1": "run-s build publish:environment-info-1",
